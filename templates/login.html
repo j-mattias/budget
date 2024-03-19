@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}Log in{% endblock %}
+
+{% block body %}
+    <form action="{{ url_for('login') }}" method="post">
+        <div>
+            <input autocomplete="off" autofocus name="username" placeholder="Username / Email" type="text">
+        </div>
+        <div>
+            <input autocomplete="off" name="password" placeholder="Password" type="password">
+        </div>
+        <button class="btn" type="submit">Log in</button>
+    </form>
+{% endblock %}

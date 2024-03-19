@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Defaults */
+* {
+    --main-color: #0b0814;
+    --text-color: rgb(243, 243, 243);
+    --nav-hover: #7751ff;   
+    --logo-color: rgba(119, 81, 255, 1);
+    --input-color: #7751ff;      
+    
+    background-color: var(--main-color);
+    color: var(--text-color);
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-optical-sizing: auto;
+    font-size: 20px;
+}
+
+/* Container */
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 30px 10%;
+}
+
+.navbar li {
+    display: inline-block;
+    padding: 0px 10px;
+}
+
+.navbar li a {
+    transition: all 0.1s ease 0s;
+    text-decoration: none;
+}
+
+.navbar li a:hover {
+    color: var(--nav-hover);
+}
+
+.logo {
+    color: var(--logo-color);
+    text-decoration: none;
+    font-weight: 800;
+    margin-right: auto;
+}
+
+/* Inputs */
+input {
+    background-color: rgba(175, 175, 175, 0.1);
+    border: none;
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    outline-style: none;
+}
+
+input:focus {
+    background-color: var(--input-color);
+}
+
+button {
+    background-color: var(--logo-color);
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgba(119, 81, 255, 0.7);
+}
+
+form > button {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Alerts */
+.alert {
+    background-color: rgb(175, 0, 0);
+    margin-bottom: 0.5rem;
+    border: thin solid;
+    border-radius: 8px; 
+    border-color: rgb(255, 88, 88);
+    padding: 0.5rem;
+    width: auto;
+    margin: 0.5rem auto;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+}

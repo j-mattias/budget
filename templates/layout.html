@@ -4,13 +4,39 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Budget - {% block title %}{% endblock %}</title>
         <link href="/static/styles.css" rel="stylesheet">
         <script src="/static/script.js"></script>
+
+        <title>Budget - {% block title %}{% endblock %}</title>
     </head>
     <body>
-        <nav></nav>
-        <main>
+        <nav class="navbar">
+            <a class="logo" href="{{ url_for('index') }}">Budget</a>
+            {% if session["user_id"] %}
+                <ul>
+                    <li><a href="{{ url_for('create') }}">Create</a></li>
+                    <li><a href="{{ url_for('account') }}">Account</a></li>
+                </ul>
+                <ul>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            {% else %}
+                <ul>
+                    <li><a href="{{ url_for('login') }}">Log in</a></li>
+                    <li><a href="{{ url_for('register') }}">Register</a></li>
+                </ul>
+            {% endif %}
+        </nav>
+
+        {% if get_flashed_messages() %}
+            <div class="container">
+                <div class="alert" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+                </div>
+            </div>
+        {% endif %}
+
+        <main class="container">
             {% block body %}{% endblock %}
         </main>
     </body>

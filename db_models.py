@@ -17,6 +17,7 @@ class User(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(100), unique=True)
+    username_lower: Mapped[str] = mapped_column(String(100), unique=True)
     password: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
 
@@ -27,7 +28,10 @@ class User(db.Model):
     budget: Mapped[List["Budget"]] = relationship(back_populates="user", cascade="all, delete")
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, username={self.username!r}, password=hashed, email={self.email!r})"
+        return f"""
+                User(id={self.id!r}, username={self.username!r}, username_lower={self.username_lower!r}, 
+                password=hashed, email={self.email!r})
+                """
 
 
 class Budget(db.Model):
