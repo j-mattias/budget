@@ -12,7 +12,7 @@ def login_required(func):
         if session.get("user_id") is None:
             
             # https://flask.palletsprojects.com/en/3.0.x/api/#flask.Request.url
-            # take user back to page they were trying to access
+            # take user back to page they were trying to access, after they log in
             return redirect(url_for("login", next=request.url))
         return func(*args, **kwargs)
     

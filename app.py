@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import login_required
 from validator_collection import checkers
 from sqlalchemy.exc import IntegrityError, NoResultFound
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -19,7 +20,8 @@ app.config["SQLALCHEMY_ECHO"] = True
 
 # Configure flask-session
 app.config["SESSION_TYPE"] = "sqlalchemy"
-app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
 app.config["SESSION_SQLALCHEMY"] = db
 
 # Bind SQLAlchemy to the Flask app instance
@@ -35,11 +37,11 @@ CATEGORIES = [
 
 
 @app.route("/")
-#@login_required
+@login_required
 def index():
     temp = "Hello, world!"
-
-    return render_template("index.html", temp=temp)
+    
+    return render_template("index.html", temp=temp, user=session["user_id"])
 
 
 @app.route("/create")
@@ -55,27 +57,47 @@ def account():
 @app.route("/logout")
 def logout():
 
-    # Clear user_id from the session, if there was no key, return None instead
-    #session.pop("user_id", None)
-    session.clear()
-
-    flash("You've been logged out.")
-
-    return redirect(url_for("login"))
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-
     # Forget user
     session.clear()
 
+    return redirect(url_for("index"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login(): 
+
     if request.method == "POST":
+
+        # Get user input
         user = request.form.get("username").lower()
         password = request.form.get("password")
 
+        error = None
 
-    return render_template("login.html")
+        try:
+            # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
+            # Select based on either username or email, raises error if not found
+            user = db.session.execute(db.select(User).where((User.username_lower==user) | (User.email==user))).scalar_one()
+            
+            # Check password
+            if not check_password_hash(user.password, password):
+                error = "Incorrect password"
+                
+        except NoResultFound:
+            error = "Invalid username or email"
+
+        # If there was no error, start the session and redirect the
+        if error is None:
+            session["user_id"] = user.id
+            return redirect(url_for("index"))
+        
+        flash(error)
+
+    else:
+
+        # Forget user
+        session.clear()
+        return render_template("login.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
