@@ -39,8 +39,8 @@ class Budget(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    budget: Mapped[int]
-    result: Mapped[int]
+    budget: Mapped[float]
+    result: Mapped[float]
     name: Mapped[str]
 
     # https://stackoverflow.com/questions/76942961/specify-timestamp-column-type-hint-in-the-creation-of-a-table-using-sqlalchemy-a
@@ -69,7 +69,7 @@ class Expense(db.Model):
     # A list in app.py will define valid categories for more flexibility
     category: Mapped[str]
     note: Mapped[Optional[str]] = mapped_column(default="expense")
-    amount: Mapped[int]
+    amount: Mapped[float]
 
     budget: Mapped["Budget"] = relationship(back_populates="expenses")
 

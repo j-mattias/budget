@@ -1,7 +1,7 @@
 import os
 import re
 
-from flask import Flask, render_template, request, session, redirect, flash, url_for
+from flask import Flask, render_template, request, session, redirect, flash, url_for, jsonify
 from flask_session import Session
 from db_models import *
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -44,9 +44,16 @@ def index():
     return render_template("index.html", temp=temp, user=session["user_id"])
 
 
-@app.route("/create")
+@app.route("/create", methods=["GET", "POST"])
 def create():
-    return "Create route"
+
+    if request.method == "POST":
+
+        form = request.json
+        print(f"FORM >>>>>>>>> {form}")
+        return jsonify({"response": "Data submitted"})
+    else:
+        return render_template("create.html", categories=CATEGORIES)
 
 
 @app.route("/account")
@@ -156,3 +163,6 @@ def register():
         flash(error)
 
     return render_template("register.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
