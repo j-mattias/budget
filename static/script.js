@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             inputExpense.type = "text";
             inputExpense.name = "expense";
             inputExpense.placeholder = "Expense";
+            inputExpense.id = i;
 
             inputCost.type = "number";
             inputCost.name = "cost";
@@ -68,6 +69,10 @@ document.addEventListener("DOMContentLoaded", function () {
             let item = document.querySelector(`#${addButton.id}`);
             item.appendChild(div);
 
+            // Add event listeners for inputs to provide more feedback
+            preventNameCollision(inputExpense);
+            updateResult(inputCost);
+
             // Increment i to associate an id value for each input row with the correct delete button
             i++;
         });
@@ -75,6 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* Form data collection and formatting */
     // https://www.youtube.com/watch?v=DqyJFV7QJqc
+
     // Select the form
     const form = document.querySelector(".budget-form");
 
@@ -84,14 +90,19 @@ document.addEventListener("DOMContentLoaded", function () {
         // Prevent default behavior
         event.preventDefault();
 
+        let budget = parseFloat(document.querySelector("input[name='budget']").value);
+
         // Create initial object to append and nest other inputs in
         let formData = {
-            budget: document.querySelector("input[name='budget']").value.trim()
+            name: document.querySelector("input[name='name']").value.trim(),
+            total: budget
         };
 
         // Select the input rows that were added by the user
         let created = document.querySelectorAll(".created");
         
+        let collisions = 0;
+
         // For each row of fields, get the expense and cost, adding them to the object
         created.forEach((input) => {
 
@@ -99,6 +110,13 @@ document.addEventListener("DOMContentLoaded", function () {
             let categoryName = input.dataset.category;
             let expense = input.querySelector("input[name='expense']").value.trim();
             let cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
+
+            // Check for name collisions and add the key to the object if they do
+            let inputColor = input.querySelector("input[name='expense']").style.backgroundColor;
+            if (inputColor === "red") {
+                collisions++;
+                formData["collisions"] = collisions;
+            }
 
             // Check inputs and whether the category key exists, otherwise create it
             if (categoryName && expense && !isNaN(cost)) {
@@ -131,4 +149,62 @@ document.addEventListener("DOMContentLoaded", function () {
 function removeInput(id) {
     let div = document.getElementById(id);
     div.remove();
+}
+
+/* Give feedback if expense names are the same */
+function preventNameCollision(input) {
+    input.addEventListener("input", function() {
+        if (valueExists(input, "input[name='expense']")) {
+            input.style.backgroundColor = "red";
+            console.log("name exists");
+        } else {
+            input.style.backgroundColor = "";
+        } 
+    });
+}
+
+/* Check if an input value already exists */
+function valueExists(elem, select) {
+    let nodeList = document.querySelectorAll(select);
+    let exists = false;
+
+    // Check existing input fields to see if value already exists, category specific
+    nodeList.forEach((node) => {
+        let elemCategory = elem.parentElement.dataset.category;
+        let nodeCategory = node.parentElement.dataset.category;
+        let nodeValue = node.value.toLowerCase();
+        let elemValue = elem.value.toLowerCase();
+
+        if (nodeValue === elemValue && node.id != elem.id && nodeCategory === elemCategory) {
+            exists = true;
+        }
+    });
+    return exists;
+}
+
+/* Update the total result as user inputs costs */
+function updateResult(input) {
+    let nodeList = document.querySelectorAll("input[name='cost']");
+    let total;
+    let result = document.querySelector("#result");
+
+    // Add event listener to each cost input
+    input.addEventListener("input", function() {
+        total = 0;
+
+        // Check value of each cost input in the DOM, add values together
+        nodeList.forEach((node) => {
+            let value = parseFloat(node.value);
+
+            // Check that the value is a number
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            total += parseFloat(value);
+        });
+
+        // Limit display result to 2 decimal places
+        result.innerHTML = total.toFixed(2);
+    });
 }
