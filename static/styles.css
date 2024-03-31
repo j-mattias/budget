@@ -32,6 +32,7 @@
 
 ul {
     padding: 0;
+    list-style: none;
 }
 
 /* Navbar */
@@ -54,7 +55,6 @@ ul {
 .navbar ul {
     display: flex;
     padding: 0;
-    list-style: none;
 }
 
 .navbar li a:hover {
@@ -136,6 +136,10 @@ form > button {
     display: flex;
     margin-left: auto;
     margin-right: auto;
+}
+
+.budget-form {
+    display: inline-block;
 }
 
 /* Alerts */

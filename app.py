@@ -45,13 +45,33 @@ def index():
 
 
 @app.route("/create", methods=["GET", "POST"])
+@login_required
 def create():
 
     if request.method == "POST":
 
         form = request.json
+        error = None
+
         print(f"FORM >>>>>>>>> {form}")
-        return jsonify({"response": "Data submitted"})
+
+        # Check for budget name and collisions
+        if not form.get("info").get("name"):
+            error = "Missing budget name"
+        elif form.get("collisions"):
+            error = "Expense name collision(s), use unique names"
+
+        # Check for valid categories
+        for key in form.get("categories").keys():
+            if not key or key not in CATEGORIES:
+                error = "No categories or invalid/missing input"
+
+        if error is None:
+            return jsonify({"response": "Data submitted"})
+            return redirect(url_for("index"))
+        
+        return jsonify({"response": error})
+
     else:
         return render_template("create.html", categories=CATEGORIES)
 

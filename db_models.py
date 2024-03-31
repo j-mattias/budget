@@ -39,7 +39,7 @@ class Budget(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    budget: Mapped[float]
+    budget: Mapped[Optional[float]]
     result: Mapped[float]
     name: Mapped[str]
 

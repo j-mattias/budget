@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    clearAlert();
+
     /* Accordion */
     // https://www.w3schools.com/howto/howto_js_accordion.asp
     const accordions = document.querySelectorAll(".accordion");
@@ -85,26 +87,42 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".budget-form");
 
     // Listen for the submit event
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", async function(event) {
 
         // Prevent default behavior
         event.preventDefault();
 
+        let budgetName = document.querySelector("input[name='name']").value.trim();
         let budget = parseFloat(document.querySelector("input[name='budget']").value);
+
+        // Ensure there's a name for the budget
+        if (!budgetName) {
+            createAlert("Missing budget name");
+            return;
+        }
 
         // Create initial object to append and nest other inputs in
         let formData = {
-            name: document.querySelector("input[name='name']").value.trim(),
-            total: budget
+            "info": {
+            name: budgetName ? budgetName : null,
+            total: budget ? budget : null
+            },
+            "categories": {}
         };
 
         // Select the input rows that were added by the user
-        let created = document.querySelectorAll(".created");
-        
-        let collisions = 0;
+        let created = document.querySelectorAll(".created");        
 
+        // Check that there were some inputs provided
+        if (created.length === 0) {
+            createAlert("No categories or invalid/missing input")
+            return;
+        }
+
+        // Had to use this since forEach method won't stop even if you return
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries#examples
         // For each row of fields, get the expense and cost, adding them to the object
-        created.forEach((input) => {
+        for (const [index, input] of created.entries()) {
 
             // Get the category name so that specific expenses and costs can be assosciated with it
             let categoryName = input.dataset.category;
@@ -112,33 +130,47 @@ document.addEventListener("DOMContentLoaded", function () {
             let cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
 
             // Check for name collisions and add the key to the object if they do
-            let inputColor = input.querySelector("input[name='expense']").style.backgroundColor;
-            if (inputColor === "red") {
-                collisions++;
-                formData["collisions"] = collisions;
+            let inputColor = input.querySelector("input[name='expense']");
+
+            if (inputColor.style.backgroundColor === "red") {
+                createAlert("Expense name collision(s), use unique names");
+                formData["collisions"] = true;
+                return;
+            }
+
+            // If there's no expense name, create a generic one
+            if (!expense) {
+                expense = "expense" + (index + 1);
             }
 
             // Check inputs and whether the category key exists, otherwise create it
             if (categoryName && expense && !isNaN(cost)) {
-                if (!formData.hasOwnProperty(categoryName)) {
-                    formData[categoryName] = {};
+                if (!formData["categories"].hasOwnProperty(categoryName)) {
+                    formData["categories"][categoryName] = {};
                 }
 
                 // Add users expense and cost as key value pairs to the object
-                formData[categoryName][expense] = cost;
-            } else {
-                console.log("Invalid input");
+                formData["categories"][categoryName][expense] = cost;
             }
-        });
-        
+        }
+
         // Send a POST request to the /create view
-        fetch("/create", {
+        let request = await fetch("/create", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(formData)
         });
+
+        clearAlert();
+
+        // Get response from server
+        let response = await request.json();
+        for (let msg in response) {
+            createAlert(response[msg]);
+            console.log("response " + response[msg]);
+        }
 
         console.log(formData);
         console.log(JSON.stringify(formData));
@@ -156,7 +188,7 @@ function preventNameCollision(input) {
     input.addEventListener("input", function() {
         if (valueExists(input, "input[name='expense']")) {
             input.style.backgroundColor = "red";
-            console.log("name exists");
+            // console.log("name exists");
         } else {
             input.style.backgroundColor = "";
         } 
@@ -207,4 +239,44 @@ function updateResult(input) {
         // Limit display result to 2 decimal places
         result.innerHTML = total.toFixed(2);
     });
+}
+
+/* Create alert message to inform user of error */
+function createAlert(error) {
+
+    clearAlert();
+
+    // Create alert element, showing the error message
+    if (error) {
+
+        // Get place to insert alert
+        let navbar = document.querySelector(".navbar");
+
+        // Create alert components
+        let div = document.createElement("div");
+        let ul = document.createElement("ul");
+        let li = document.createElement("li");
+
+        // Add attributes
+        div.classList.add("container");
+        div.role = "alert";
+
+        li.innerHTML = error;
+        li.classList.add("alert");
+
+        // Append elements to DOM
+        ul.appendChild(li);
+        div.appendChild(ul);
+        navbar.after(div);
+    }
+    return;
+}
+
+function clearAlert() {
+
+    // Remove existing alert
+    let alert = document.querySelector("div[role='alert']");
+    if (alert) {
+        alert.remove();
+    }
 }
