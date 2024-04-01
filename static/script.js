@@ -92,8 +92,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Prevent default behavior
         event.preventDefault();
 
-        let budgetName = document.querySelector("input[name='name']").value.trim();
-        let budget = parseFloat(document.querySelector("input[name='budget']").value);
+        const budgetName = document.querySelector("input[name='name']").value.trim();
+        const budget = parseFloat(document.querySelector("input[name='budget']").value);
+        const result = parseFloat(document.querySelector("#result").innerHTML);
 
         // Ensure there's a name for the budget
         if (!budgetName) {
@@ -105,7 +106,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let formData = {
             "info": {
             name: budgetName ? budgetName : null,
-            total: budget ? budget : null
+            total: budget ? budget : null,
+            result: result ? result : null
             },
             "categories": {}
         };

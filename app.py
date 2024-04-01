@@ -50,26 +50,69 @@ def create():
 
     if request.method == "POST":
 
-        form = request.json
         error = None
 
-        print(f"FORM >>>>>>>>> {form}")
+        # Get the JSON object containing form data
+        form = request.json
+
+        # Break it up into budget and expense data for convenience
+        budget = form.get("info")
+        expenses = form.get("categories")
 
         # Check for budget name and collisions
-        if not form.get("info").get("name"):
+        if not budget.get("name"):
             error = "Missing budget name"
         elif form.get("collisions"):
             error = "Expense name collision(s), use unique names"
 
         # Check for valid categories
-        for key in form.get("categories").keys():
+        for key in expenses.keys():
             if not key or key not in CATEGORIES:
-                error = "No categories or invalid/missing input"
+                error = "Invalid categories or invalid/missing input"
 
+        # Try to add the budget to the database
+        try:
+            new_budget = Budget(
+                user_id=session["user_id"],
+                budget=budget.get("total"),
+                result=budget.get("result"),
+                name=budget.get("name")
+                )
+            db.session.add(new_budget)
+
+            # https://docs.sqlalchemy.org/en/20/tutorial/orm_data_manipulation.html#flushing
+            # Create new transaction and emit SQL, but transaction remains open until commit is called
+            db.session.flush()
+        except IntegrityError:
+            db.session.rollback()
+            error = "Budget could not be saved"
+
+        # Loop through categories, and expenses inside them
+        for category in expenses.keys():
+            for expense in expenses[category]:
+                amount = expenses[category][expense]
+
+                # Try to add expense to database
+                try:
+                    new_expense = Expense(
+                        budget_id=new_budget.id,
+                        category=category,
+                        note=expense,
+                        amount=amount
+                    )
+                    db.session.add(new_expense)
+                except IntegrityError:
+                    db.session.rollback()
+                    error = "Data could not be saved"
+                    break
+
+        # If there was no error, commit the transactions to the database
         if error is None:
+            db.session.commit()
             return jsonify({"response": "Data submitted"})
             return redirect(url_for("index"))
         
+        # If something went wrong, return the error message to display
         return jsonify({"response": error})
 
     else:
@@ -119,6 +162,7 @@ def login():
             return redirect(url_for("index"))
         
         flash(error)
+        return render_template("login.html")
 
     else:
 
