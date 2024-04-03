@@ -39,9 +39,71 @@ CATEGORIES = [
 @app.route("/")
 @login_required
 def index():
-    temp = "Hello, world!"
+
+    # Select all of the users budgets
+    budgets = db.session.execute(
+                                db.select(Budget)
+                                .where(Budget.user_id == session["user_id"])
+                                .group_by(Budget)
+                                .order_by(Budget.timestamp.desc())
+                                ).scalars().all()
+   
+    return render_template("index.html", budgets=budgets)
+
+
+@app.route("/budget/<int:id>")
+@login_required
+def budget(id):
+
+    # https://docs.sqlalchemy.org/en/20/tutorial/orm_related_objects.html#using-relationships-in-queries
+    # Select budget and expenses associated with it
+    budget = db.session.execute(
+                                db.select(Budget)
+                                .join_from(Budget, Expense)
+                                .where(Budget.id == id)
+                                .group_by(Budget)
+                                .order_by(Budget.timestamp.desc())
+                                ).scalar_one()
     
-    return render_template("index.html", temp=temp, user=session["user_id"])
+    # Prevent other users from accessing current users budgets
+    if session["user_id"] != budget.user_id:
+        return "Unauthorized"
+    
+    # Initialize a dictionary to store budget and expense information
+    json = {
+        "info": {
+            "name": budget.name,
+            "total": budget.budget,
+            "result": budget.result,
+            "id": id
+            },
+        "categories": {}
+    }
+
+    # Add categories and expense, cost key value pairs to categories part of the dictionary
+    for expense in budget.expenses:
+        if expense.category not in json["categories"].keys():
+            json["categories"][expense.category] = {}
+        json["categories"][expense.category][expense.note] = expense.amount
+    # print(">>>>>>>>>>>>>>>", json)
+
+    """ 
+    {
+        'info': {
+        'name': 'My budget69', 
+        'total': None, 
+        'result': 275.0
+        }, 
+        'categories': 
+        {'housing': {'Rent': 10.0, 'House': 200.0}, 
+        'transportation': {'Car': 20.0, 'Gas': 10.0}, 
+        'utilities': {'Electricity': 30.0}, 
+        'other': {'Fun': 5.0}
+        }
+        } 
+    """
+
+    return render_template("budget.html", budget=budget, json=json)
 
 
 @app.route("/create", methods=["GET", "POST"])
@@ -86,11 +148,15 @@ def create():
         except IntegrityError:
             db.session.rollback()
             error = "Budget could not be saved"
+            return jsonify({"response": error})
 
         # Loop through categories, and expenses inside them
         for category in expenses.keys():
             for expense in expenses[category]:
                 amount = expenses[category][expense]
+
+                if not amount:
+                    error = "Missing cost value for one or more inputs"
 
                 # Try to add expense to database
                 try:

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Budget
+{% endblock %}
+
+{% block body %}
+    <div class="container" id="budget-form">
+        <form class="budget-form">
+            <input autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" disabled>
+            <input autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01" value="{{ json.info.total }}" disabled>
+            {% for category in json.categories %}
+                <button class="accordion" type="button">{{ category }}<i class="material-icons md-20">expand_more</i></button>
+                <div class="item" id="{{ category }}">
+                    <button type="button" class="add" id="{{ category }}" disabled>Add Expense</button>
+                    {% for note, cost in json.categories[category].items() %}
+                        <div id="{{ loop.index0 }}" class="created" data-category="{{ category }}">
+                            <input id="{{ loop.index0 }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" disabled>
+                            <input type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" disabled>
+                            <button class="delete" type="button" onclick="removeInput('{{ loop.index0 }}')" disabled>-</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <label class="result">Result: <span id="result">{{ json.info.result }}</span></label>
+            <button type="submit" disabled>Save</button>
+            {{ json.info.id }}
+        </form>
+    </div>
+{% endblock %}

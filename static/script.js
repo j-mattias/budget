@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             inputCost.placeholder = "Cost";
             inputCost.step = "0.01";
             inputCost.min = "0.01";
-            inputCost.setAttribute("required", "true");
+            // inputCost.setAttribute("required", "true");
 
             // Create div and append inputs
             let div = document.createElement("div");            
@@ -131,6 +131,11 @@ document.addEventListener("DOMContentLoaded", function () {
             let expense = input.querySelector("input[name='expense']").value.trim();
             let cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
 
+            // If there's no cost in the input skip it
+            if (!cost || isNaN(cost)) {
+                continue;
+            }
+
             // Check for name collisions and add the key to the object if they do
             let inputColor = input.querySelector("input[name='expense']");
 
@@ -209,7 +214,7 @@ function valueExists(elem, select) {
         let nodeValue = node.value.toLowerCase();
         let elemValue = elem.value.toLowerCase();
 
-        if (nodeValue === elemValue && node.id != elem.id && nodeCategory === elemCategory) {
+        if (nodeValue === elemValue && node.id != elem.id && nodeCategory === elemCategory && nodeValue != "" && elemValue != "") {
             exists = true;
         }
     });

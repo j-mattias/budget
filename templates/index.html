@@ -3,6 +3,21 @@
 {% block title %}Index{% endblock %}
 
 {% block body %}
-    {{ temp }}
-    {{ user }}
+    <table>
+        <thead>
+            <tr>
+                <td>Budget</td>
+                <td>Created</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for budget in budgets %}
+                <tr>
+                    <td><a href="{{ url_for('budget', id=budget.id ) }}">{{ budget.name }}</a></td>
+                    <!-- https://stackoverflow.com/questions/4830535/how-do-i-format-a-date-in-jinja2 -->
+                    <td>{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
