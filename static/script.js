@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     clearAlert();
+    generatedInputs();
+    editForm();
 
     /* Accordion */
     // https://www.w3schools.com/howto/howto_js_accordion.asp
@@ -17,68 +19,23 @@ document.addEventListener("DOMContentLoaded", function () {
             let icon = this.querySelector(".material-icons");
 
             // If category is open, close it
-            if (item.style.display == "block") {
-                item.style.display = "none";
+            // if (item.style.display == "block") {
+            if (item.classList.contains("enabled")) {
+                // item.style.display = "none";
+                item.classList.add("disabled");
+                item.classList.remove("enabled");
                 icon.textContent = "expand_more";
             // Else open it
             } else {
-                item.style.display = "block";
+                // item.style.display = "block";
+                item.classList.add("enabled");
+                item.classList.remove("disabled");
                 icon.textContent = "expand_less";
             }
         });
     }
 
-    /* Add and remove input fields for categories */
-    const addButtons = document.querySelectorAll(".add");
-    let i = 0;
-    for (let addButton of addButtons) {
-        addButton.addEventListener("click", function() {  
-            
-            // Create inputs and set some attribute values
-            let inputExpense = document.createElement("input");
-            let inputCost = document.createElement("input");
-
-            inputExpense.type = "text";
-            inputExpense.name = "expense";
-            inputExpense.placeholder = "Expense";
-            inputExpense.id = i;
-
-            inputCost.type = "number";
-            inputCost.name = "cost";
-            inputCost.placeholder = "Cost";
-            inputCost.step = "0.01";
-            inputCost.min = "0.01";
-            // inputCost.setAttribute("required", "true");
-
-            // Create div and append inputs
-            let div = document.createElement("div");            
-            div.dataset.category = addButton.id;
-            div.id = i;
-            div.classList.add("created");
-
-            div.appendChild(inputExpense);
-            div.appendChild(inputCost);
-
-            // Add a button to remove inputs
-            let removeButton = document.createElement("button");
-            removeButton.type = "button";
-            removeButton.textContent = "-";
-            removeButton.classList.add("delete");
-            removeButton.setAttribute("onclick", `removeInput(${div.id})`);
-            div.appendChild(removeButton);
-
-            // Add inputs to correct category
-            let item = document.querySelector(`#${addButton.id}`);
-            item.appendChild(div);
-
-            // Add event listeners for inputs to provide more feedback
-            preventNameCollision(inputExpense);
-            updateResult(inputCost);
-
-            // Increment i to associate an id value for each input row with the correct delete button
-            i++;
-        });
-    }
+    addInputs();
 
     /* Form data collection and formatting */
     // https://www.youtube.com/watch?v=DqyJFV7QJqc
@@ -279,6 +236,7 @@ function createAlert(error) {
     return;
 }
 
+/* Clear alert */
 function clearAlert() {
 
     // Remove existing alert
@@ -287,3 +245,131 @@ function clearAlert() {
         alert.remove();
     }
 }
+
+function generatedInputs() {
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach((input) => {
+        if (input.name === "expense") {
+            preventNameCollision(input);
+        }
+        else if (input.name === "cost") {
+            updateResult(input);
+        }
+    });
+}
+
+/* Toggling form fields on/off and showing/hiding elements for adding/removing fields */
+function editForm() {
+    const edit = document.querySelector("#edit");
+    
+    if (edit === null) {
+        return;
+    }
+    
+    edit.addEventListener("click", function() {
+
+        const form = document.querySelector(".budget-form");
+        const inputs = form.querySelectorAll("input");
+
+        inputs.forEach((input) => {
+            if (input.hasAttribute("disabled")) {
+                input.removeAttribute("disabled");
+            } else {
+                input.setAttribute("disabled", "true");
+            }
+        });
+
+        const addButtons = document.querySelectorAll(".add");
+        addButtons.forEach((addButton) => {
+            addButton.classList.toggle("disabled");
+        });
+
+        const deleteButtons = document.querySelectorAll(".delete");
+        deleteButtons.forEach((deleteButton) => {
+            deleteButton.classList.toggle("disabled");
+        });
+    });
+}
+
+/* Add and remove input fields for categories */
+function addInputs() {
+    const addButtons = document.querySelectorAll(".add");
+    const created = document.querySelectorAll(".created");
+
+    let i;
+    if (created.length > 0) {
+
+        // Get current last id and add 1, to avoid overlapping
+        i = parseInt(created[created.length - 1].id) + 1;
+    } else {
+        i = 0;
+    }
+
+    for (let addButton of addButtons) {
+        addButton.addEventListener("click", function() {  
+            
+            // Create inputs and set some attribute values
+            let inputExpense = document.createElement("input");
+            let inputCost = document.createElement("input");
+    
+            inputExpense.type = "text";
+            inputExpense.name = "expense";
+            inputExpense.placeholder = "Expense";
+            inputExpense.id = i;
+    
+            inputCost.type = "number";
+            inputCost.name = "cost";
+            inputCost.placeholder = "Cost";
+            inputCost.step = "0.01";
+            inputCost.min = "0.01";
+            // inputCost.setAttribute("required", "true");
+    
+            // Create div and append inputs
+            let div = document.createElement("div");            
+            div.dataset.category = addButton.id;
+            div.id = i;
+            div.classList.add("created");
+    
+            div.appendChild(inputExpense);
+            div.appendChild(inputCost);
+    
+            // Add a button to remove inputs
+            let removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.textContent = "-";
+            removeButton.classList.add("delete");
+            removeButton.setAttribute("onclick", `removeInput(${div.id})`);
+            div.appendChild(removeButton);
+    
+            // Add inputs to correct category
+            let item = document.querySelector(`#${addButton.id}`);
+            item.appendChild(div);
+    
+            // Add event listeners for inputs to provide more feedback
+            preventNameCollision(inputExpense);
+            updateResult(inputCost);
+    
+            // Increment i to associate an id value for each input row with the correct delete button
+            i++;
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    
+    const checkedCategories = document.querySelectorAll("input[type='checkbox']");
+
+    checkedCategories.forEach((box) => {
+        box.addEventListener("change", () => {
+            let accordion = document.querySelector(`button[id='${box.id}']`);
+            accordion.classList.toggle("disabled");
+            if (box.checked) {
+                accordion.nextElementSibling.classList.add("enabled");
+                accordion.nextElementSibling.classList.remove("disabled");
+            } else {
+                accordion.nextElementSibling.classList.remove("enabled");
+                accordion.nextElementSibling.classList.add("disabled");
+            }
+        });
+    });
+});

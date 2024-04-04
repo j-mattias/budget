@@ -85,25 +85,8 @@ def budget(id):
         if expense.category not in json["categories"].keys():
             json["categories"][expense.category] = {}
         json["categories"][expense.category][expense.note] = expense.amount
-    # print(">>>>>>>>>>>>>>>", json)
 
-    """ 
-    {
-        'info': {
-        'name': 'My budget69', 
-        'total': None, 
-        'result': 275.0
-        }, 
-        'categories': 
-        {'housing': {'Rent': 10.0, 'House': 200.0}, 
-        'transportation': {'Car': 20.0, 'Gas': 10.0}, 
-        'utilities': {'Electricity': 30.0}, 
-        'other': {'Fun': 5.0}
-        }
-        } 
-    """
-
-    return render_template("budget.html", budget=budget, json=json)
+    return render_template("budget.html", json=json, categories=CATEGORIES)
 
 
 @app.route("/create", methods=["GET", "POST"])
