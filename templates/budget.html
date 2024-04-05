@@ -32,7 +32,7 @@
                             <div id="{{ count.value }}" class="created" data-category="{{ category }}">
                                 <input id="{{ count.value }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" disabled>
                                 <input type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" disabled>
-                                <button class="delete disabled" type="button" onclick="removeInput('{{ count.value }}')" disabled>-</button>
+                                <button class="delete disabled" type="button">-</button>
                             </div>
                             {% set count.value = count.value + 1 %}
                         {% endfor %}

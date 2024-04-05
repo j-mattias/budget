@@ -1,41 +1,25 @@
+import { Alert } from "./classes.js";
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    clearAlert();
+    const navbar = document.querySelector(".navbar");
+    let alert = new Alert(navbar);
+    alert.clear();
+    // clearAlert();
     generatedInputs();
     editForm();
 
+    // let newForm = new FormControl();
     /* Accordion */
     // https://www.w3schools.com/howto/howto_js_accordion.asp
     const accordions = document.querySelectorAll(".accordion");
-
-    for (let accordion of accordions) {
-        accordion.addEventListener("click", function() {
-
-            // Toggle the active class on/off
-            this.classList.toggle("active");
-
-            // Select the item class, the sibling of accordion
-            let item = this.nextElementSibling;
-            let icon = this.querySelector(".material-icons");
-
-            // If category is open, close it
-            // if (item.style.display == "block") {
-            if (item.classList.contains("enabled")) {
-                // item.style.display = "none";
-                item.classList.add("disabled");
-                item.classList.remove("enabled");
-                icon.textContent = "expand_more";
-            // Else open it
-            } else {
-                // item.style.display = "block";
-                item.classList.add("enabled");
-                item.classList.remove("disabled");
-                icon.textContent = "expand_less";
-            }
-        });
-    }
-
-    addInputs();
+    enableAccordions(accordions);
+    // newForm.enableAccordion(accordions);
+    
+    const addButtons = document.querySelectorAll(".add");
+    const created = document.querySelectorAll(".created");
+    addInputs(addButtons, created);
+    console.log("main", addButtons);
 
     /* Form data collection and formatting */
     // https://www.youtube.com/watch?v=DqyJFV7QJqc
@@ -55,7 +39,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Ensure there's a name for the budget
         if (!budgetName) {
-            createAlert("Missing budget name");
+            // createAlert("Missing budget name");
+            alert.create("Missing budget name");
             return;
         }
 
@@ -74,7 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Check that there were some inputs provided
         if (created.length === 0) {
-            createAlert("No categories or invalid/missing input")
+            // createAlert("No categories or invalid/missing input");
+            alert.create("No categories or invalid/missing input");
             return;
         }
 
@@ -97,7 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let inputColor = input.querySelector("input[name='expense']");
 
             if (inputColor.style.backgroundColor === "red") {
-                createAlert("Expense name collision(s), use unique names");
+                // createAlert("Expense name collision(s), use unique names");
+                alert.create("Expense name collision(s), use unique names");
                 formData["collisions"] = true;
                 return;
             }
@@ -127,12 +114,14 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify(formData)
         });
 
-        clearAlert();
+        // clearAlert();
+        alert.clear();
 
         // Get response from server
         let response = await request.json();
         for (let msg in response) {
-            createAlert(response[msg]);
+            // createAlert(response[msg]);
+            alert.create(response[msg]);
             console.log("response " + response[msg]);
         }
 
@@ -141,9 +130,40 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-/* Delete inputs */
+function enableAccordions(buttons) {
+    for (let accordion of buttons) {
+        accordion.addEventListener("click", function() {
+    
+            // Toggle the active class on/off
+            this.classList.toggle("active");
+    
+            // Select the item class, the sibling of accordion
+            let item = this.nextElementSibling;
+            let icon = this.querySelector(".material-icons");
+    
+            // If category is open, close it
+            // if (item.style.display == "block") {
+            if (item.classList.contains("enabled")) {
+                // item.style.display = "none";
+                item.classList.add("disabled");
+                item.classList.remove("enabled");
+                icon.textContent = "expand_more";
+            // Else open it
+            } else {
+                // item.style.display = "block";
+                item.classList.add("enabled");
+                item.classList.remove("disabled");
+                icon.textContent = "expand_less";
+            }
+        });
+    }
+}
+
+// /* Delete inputs */
 function removeInput(id) {
-    let div = document.getElementById(id);
+    // this.parentElement.remove();
+    const div = document.getElementById(id);
+    console.log("deleting");
     div.remove();
 }
 
@@ -205,7 +225,7 @@ function updateResult(input) {
     });
 }
 
-/* Create alert message to inform user of error */
+/* // Create alert message to inform user of error
 function createAlert(error) {
 
     clearAlert();
@@ -236,7 +256,7 @@ function createAlert(error) {
     return;
 }
 
-/* Clear alert */
+// Clear alert
 function clearAlert() {
 
     // Remove existing alert
@@ -244,7 +264,7 @@ function clearAlert() {
     if (alert) {
         alert.remove();
     }
-}
+} */
 
 function generatedInputs() {
     const inputs = document.querySelectorAll("input");
@@ -255,6 +275,13 @@ function generatedInputs() {
         else if (input.name === "cost") {
             updateResult(input);
         }
+    });
+
+    const deleteButtons = document.querySelectorAll(".delete");
+    deleteButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            removeInput(button.parentElement.id);
+        });
     });
 }
 
@@ -292,65 +319,73 @@ function editForm() {
 }
 
 /* Add and remove input fields for categories */
-function addInputs() {
-    const addButtons = document.querySelectorAll(".add");
-    const created = document.querySelectorAll(".created");
+function addInputs(buttons, created) {
+    // const addButtons = document.querySelectorAll(".add");
+    // const created = document.querySelectorAll(".created");
 
     let i;
     if (created.length > 0) {
-
         // Get current last id and add 1, to avoid overlapping
         i = parseInt(created[created.length - 1].id) + 1;
+        console.log("Inside if");
     } else {
         i = 0;
     }
 
-    for (let addButton of addButtons) {
+    console.log("func");
+    for (let addButton of buttons) {
         addButton.addEventListener("click", function() {  
             
             // Create inputs and set some attribute values
             let inputExpense = document.createElement("input");
             let inputCost = document.createElement("input");
-    
+            
             inputExpense.type = "text";
             inputExpense.name = "expense";
             inputExpense.placeholder = "Expense";
             inputExpense.id = i;
-    
+            
             inputCost.type = "number";
             inputCost.name = "cost";
             inputCost.placeholder = "Cost";
             inputCost.step = "0.01";
             inputCost.min = "0.01";
             // inputCost.setAttribute("required", "true");
-    
+            
             // Create div and append inputs
             let div = document.createElement("div");            
             div.dataset.category = addButton.id;
             div.id = i;
             div.classList.add("created");
-    
+            
             div.appendChild(inputExpense);
             div.appendChild(inputCost);
-    
+            
             // Add a button to remove inputs
             let removeButton = document.createElement("button");
             removeButton.type = "button";
             removeButton.textContent = "-";
             removeButton.classList.add("delete");
-            removeButton.setAttribute("onclick", `removeInput(${div.id})`);
+            // removeButton.onclick = removeInput;
+            // removeButton.id = i;
+            removeButton.addEventListener("click", () => {
+                removeInput(div.id);
+            });
+            
             div.appendChild(removeButton);
-    
+            
             // Add inputs to correct category
             let item = document.querySelector(`#${addButton.id}`);
             item.appendChild(div);
-    
+            
             // Add event listeners for inputs to provide more feedback
             preventNameCollision(inputExpense);
             updateResult(inputCost);
     
             // Increment i to associate an id value for each input row with the correct delete button
             i++;
+
+            console.log("clicked");
         });
     }
 }
