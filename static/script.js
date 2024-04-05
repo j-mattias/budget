@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const addButtons = document.querySelectorAll(".add");
     const created = document.querySelectorAll(".created");
     addInputs(addButtons, created);
-    console.log("main", addButtons);
 
     /* Form data collection and formatting */
     // https://www.youtube.com/watch?v=DqyJFV7QJqc
@@ -163,7 +162,6 @@ function enableAccordions(buttons) {
 function removeInput(id) {
     // this.parentElement.remove();
     const div = document.getElementById(id);
-    console.log("deleting");
     div.remove();
 }
 
@@ -320,25 +318,21 @@ function editForm() {
 
 /* Add and remove input fields for categories */
 function addInputs(buttons, created) {
-    // const addButtons = document.querySelectorAll(".add");
-    // const created = document.querySelectorAll(".created");
 
     let i;
     if (created.length > 0) {
         // Get current last id and add 1, to avoid overlapping
         i = parseInt(created[created.length - 1].id) + 1;
-        console.log("Inside if");
     } else {
         i = 0;
     }
 
-    console.log("func");
     for (let addButton of buttons) {
         addButton.addEventListener("click", function() {  
             
             // Create inputs and set some attribute values
-            let inputExpense = document.createElement("input");
-            let inputCost = document.createElement("input");
+            const inputExpense = document.createElement("input");
+            const inputCost = document.createElement("input");
             
             inputExpense.type = "text";
             inputExpense.name = "expense";
@@ -350,10 +344,9 @@ function addInputs(buttons, created) {
             inputCost.placeholder = "Cost";
             inputCost.step = "0.01";
             inputCost.min = "0.01";
-            // inputCost.setAttribute("required", "true");
             
             // Create div and append inputs
-            let div = document.createElement("div");            
+            const div = document.createElement("div");            
             div.dataset.category = addButton.id;
             div.id = i;
             div.classList.add("created");
@@ -362,21 +355,19 @@ function addInputs(buttons, created) {
             div.appendChild(inputCost);
             
             // Add a button to remove inputs
-            let removeButton = document.createElement("button");
+            const removeButton = document.createElement("button");
             removeButton.type = "button";
             removeButton.textContent = "-";
             removeButton.classList.add("delete");
-            // removeButton.onclick = removeInput;
-            // removeButton.id = i;
             removeButton.addEventListener("click", () => {
                 removeInput(div.id);
             });
             
             div.appendChild(removeButton);
             
-            // Add inputs to correct category
-            let item = document.querySelector(`#${addButton.id}`);
-            item.appendChild(div);
+            // Add inputs to correct category, parent of current "add expense" button, the
+            // container inside the accordion
+            addButton.parentElement.appendChild(div);
             
             // Add event listeners for inputs to provide more feedback
             preventNameCollision(inputExpense);
@@ -384,8 +375,6 @@ function addInputs(buttons, created) {
     
             // Increment i to associate an id value for each input row with the correct delete button
             i++;
-
-            console.log("clicked");
         });
     }
 }
