@@ -189,10 +189,17 @@ function valueExists(elem, select) {
         let nodeValue = node.value.toLowerCase();
         let elemValue = elem.value.toLowerCase();
 
-        if (nodeValue === elemValue && node.id != elem.id && nodeCategory === elemCategory && nodeValue != "" && elemValue != "") {
+        if (
+            nodeValue === elemValue 
+            && node.id != elem.id 
+            && nodeCategory === elemCategory 
+            && nodeValue != "" 
+            && elemValue != ""
+        ) {
             exists = true;
         }
     });
+    
     return exists;
 }
 
@@ -264,8 +271,12 @@ function clearAlert() {
     }
 } */
 
+/* Add functionality to pre-generated inputs to work the same as dynamically generated ones */
 function generatedInputs() {
+
     const inputs = document.querySelectorAll("input");
+
+    // Input functionality
     inputs.forEach((input) => {
         if (input.name === "expense") {
             preventNameCollision(input);
@@ -275,6 +286,7 @@ function generatedInputs() {
         }
     });
 
+    // Add remove function to pre-generated delete buttons
     const deleteButtons = document.querySelectorAll(".delete");
     deleteButtons.forEach((button) => {
         button.addEventListener("click", () => {
@@ -285,17 +297,22 @@ function generatedInputs() {
 
 /* Toggling form fields on/off and showing/hiding elements for adding/removing fields */
 function editForm() {
+
     const edit = document.querySelector("#edit");
     
     if (edit === null) {
         return;
     }
     
+    // When the edit button is clicked enable or disable elements
     edit.addEventListener("click", function() {
 
         const form = document.querySelector(".budget-form");
         const inputs = form.querySelectorAll("input");
+        const categoryForm = document.querySelector(".category-form");
+        const checkboxes = categoryForm.querySelectorAll("input");
 
+        // Inputs
         inputs.forEach((input) => {
             if (input.hasAttribute("disabled")) {
                 input.removeAttribute("disabled");
@@ -304,11 +321,22 @@ function editForm() {
             }
         });
 
+        // Checkboxes
+        checkboxes.forEach((checkbox) => {
+            if (checkbox.hasAttribute("disabled")) {
+                checkbox.removeAttribute("disabled");
+            } else {
+                checkbox.setAttribute("disabled", "true");
+            }
+        });
+
+        // Add expense buttons
         const addButtons = document.querySelectorAll(".add");
         addButtons.forEach((addButton) => {
             addButton.classList.toggle("disabled");
         });
 
+        // Delete inputs buttons
         const deleteButtons = document.querySelectorAll(".delete");
         deleteButtons.forEach((deleteButton) => {
             deleteButton.classList.toggle("disabled");
@@ -381,12 +409,28 @@ function addInputs(buttons, created) {
 
 document.addEventListener("DOMContentLoaded", function () {
     
+    // Select all the checkboxes
     const checkedCategories = document.querySelectorAll("input[type='checkbox']");
 
+    // Add an event listener for "change" on each checkbox
     checkedCategories.forEach((box) => {
         box.addEventListener("change", () => {
+
+            // Select the accordion that's associated with the checkbox id
             let accordion = document.querySelector(`button[id='${box.id}']`);
+
+            // Turn the accordion category on/off
             accordion.classList.toggle("disabled");
+
+            // If the accordion doesn't have the class "active" toggle it
+            if (!accordion.classList.contains("active")) {
+                accordion.classList.toggle("active");
+                accordion.firstElementChild.innerHTML = "expand_more";
+            } else {
+                accordion.firstElementChild.innerHTML = "expand_less";
+            }
+
+            // If the checkbox is checked, enable contents inside accordion, else disable
             if (box.checked) {
                 accordion.nextElementSibling.classList.add("enabled");
                 accordion.nextElementSibling.classList.remove("disabled");

@@ -9,9 +9,9 @@
         <form class="category-form">
             {% for category in categories %}
                 {% if category in json.categories %}
-                    <input type="checkbox" name="{{ category }}" id="{{ category }}" checked>
+                    <input type="checkbox" name="{{ category }}" id="{{ category }}" checked disabled>
                 {% else %}
-                    <input type="checkbox" name="{{ category }}" id="{{ category }}">
+                    <input type="checkbox" name="{{ category }}" id="{{ category }}" disabled>
                 {% endif %}
                 <label for="{{ category }}">{{ category }}</label>
             {% endfor %}
@@ -38,9 +38,9 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <button class="accordion disabled" type="button" id="{{ category }}">{{ category }}<i class="material-icons md-20">expand_more</i></button>
+                    <button class="accordion active disabled" type="button" id="{{ category }}">{{ category }}<i class="material-icons md-20">expand_less</i></button>
                     <div class="item disabled" id="{{ category }}">
-                        <button type="button" class="add disabled" id="{{ category }}">Add Expense</button>
+                        <button type="button" class="add disabled">Add Expense</button>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -51,3 +51,5 @@
         </form>
     </div>
 {% endblock %}
+
+<!-- data-accordion-category="{{ category }}" -->
