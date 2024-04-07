@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const navbar = document.querySelector(".navbar");
     let alert = new Alert(navbar);
     alert.clear();
-    // clearAlert();
     generatedInputs();
     editForm();
 
@@ -13,6 +12,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // https://www.w3schools.com/howto/howto_js_accordion.asp
     const accordions = document.querySelectorAll(".accordion");
     enableAccordions(accordions);
+
+    // Select all the checkboxes
+    const checkedCategories = document.querySelectorAll("input[type='checkbox']");
+    checkboxFilter(checkedCategories);
     
     const addButtons = document.querySelectorAll(".add");
     const created = document.querySelectorAll(".created");
@@ -52,13 +55,11 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify(formData)
         });
 
-        // clearAlert();
         alert.clear();
 
         // Get response from server
         let response = await request.json();
         for (let msg in response) {
-            // createAlert(response[msg]);
             alert.create(response[msg]);
             console.log("response " + response[msg]);
         }
@@ -317,20 +318,18 @@ function addInputs(buttons, created) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    // Select all the checkboxes
-    const checkedCategories = document.querySelectorAll("input[type='checkbox']");
+/* Toggle checkboxes to enable/disable categories */
+function checkboxFilter(checkboxes) {
 
     // Add an event listener for "change" on each checkbox
-    checkedCategories.forEach((box) => {
+    checkboxes.forEach((box) => {
         box.addEventListener("change", () => {
             // Select the accordion that's associated with the checkbox id
             let accordion = document.querySelector(`button[id='${box.id}']`);
-
+    
             // Turn the accordion category on/off
             accordion.classList.toggle("disabled");
-
+    
             // If the accordion doesn't have the class "active" toggle it
             if (!accordion.classList.contains("active")) {
                 accordion.classList.toggle("active");
@@ -338,7 +337,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 accordion.firstElementChild.innerHTML = "expand_less";
             }
-
+    
             // If the checkbox is checked, enable contents inside accordion, else disable
             if (box.checked) {
                 accordion.nextElementSibling.classList.add("enabled");
@@ -347,25 +346,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 accordion.nextElementSibling.classList.remove("enabled");
                 accordion.nextElementSibling.classList.add("disabled");
             }
-
+    
+            // Recalculate result when checkbox gets toggled
             calculateResult();
         });
     });
-});
-
-/* nodeList.forEach((node) => {
-    console.log(node.parentNode.dataset.category);
-    let x = node.parentNode.dataset.category;
-    let u = document.querySelector(`div[id='${x}']`);
-    console.log("u ->", u);
-    let reduce = 0;
-    console.log(node);
-    if (u.classList.contains("disabled")) {
-        reduce += parseFloat(node.value);
-        console.log(node.value);
-    }
-    // result.innerHTML = (parseFloat(result.value) - reduce).toFixed(2);
-}); */
+}
 
 /* Form data collection and formatting as JSON */
 // https://www.youtube.com/watch?v=DqyJFV7QJqc
