@@ -109,6 +109,8 @@ def create():
             error = "Missing budget name"
         elif form.get("collisions"):
             error = "Expense name collision(s), use unique names"
+        elif not expenses:
+            error = "Missing categories"
 
         # Check for valid categories
         for key in expenses.keys():

@@ -9,19 +9,14 @@ document.addEventListener("DOMContentLoaded", function () {
     generatedInputs();
     editForm();
 
-    // let newForm = new FormControl();
     /* Accordion */
     // https://www.w3schools.com/howto/howto_js_accordion.asp
     const accordions = document.querySelectorAll(".accordion");
     enableAccordions(accordions);
-    // newForm.enableAccordion(accordions);
     
     const addButtons = document.querySelectorAll(".add");
     const created = document.querySelectorAll(".created");
     addInputs(addButtons, created);
-
-    /* Form data collection and formatting */
-    // https://www.youtube.com/watch?v=DqyJFV7QJqc
 
     // Select the form
     const form = document.querySelector(".budget-form");
@@ -36,76 +31,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const budget = parseFloat(document.querySelector("input[name='budget']").value);
         const result = parseFloat(document.querySelector("#result").innerHTML);
 
-        // Ensure there's a name for the budget
-        if (!budgetName) {
-            // createAlert("Missing budget name");
-            alert.create("Missing budget name");
-            return;
+        // Collect data from form inputs, returns a JSON
+        let formData;
+        try {
+            formData = formDataCollection(budgetName, budget, result);
+        } catch (e) {
+            alert.create(e.message);
         }
+        console.log(formData);
 
-        // Create initial object to append and nest other inputs in
-        let formData = {
-            "info": {
-            name: budgetName ? budgetName : null,
-            total: budget ? budget : null,
-            result: result ? result : null
-            },
-            "categories": {}
-        };
-
-        // Select the input rows that were added by the user
-        let created = document.querySelectorAll(".created");        
-
-        // Check that there were some inputs provided
-        if (created.length === 0) {
-            // createAlert("No categories or invalid/missing input");
-            alert.create("No categories or invalid/missing input");
-            return;
-        }
-
-        // Had to use this since forEach method won't stop even if you return
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries#examples
-        // For each row of fields, get the expense and cost, adding them to the object
-        for (const [index, input] of created.entries()) {
-
-            // Get the category name so that specific expenses and costs can be assosciated with it
-            let categoryName = input.dataset.category;
-            let expense = input.querySelector("input[name='expense']").value.trim();
-            let cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
-
-            // If there's no cost in the input skip it
-            if (!cost || isNaN(cost)) {
-                continue;
-            }
-
-            // Check for name collisions and add the key to the object if they do
-            let inputColor = input.querySelector("input[name='expense']");
-
-            if (inputColor.style.backgroundColor === "red") {
-                // createAlert("Expense name collision(s), use unique names");
-                alert.create("Expense name collision(s), use unique names");
-                formData["collisions"] = true;
-                return;
-            }
-
-            // If there's no expense name, create a generic one
-            if (!expense) {
-                expense = "expense" + (index + 1);
-            }
-
-            // Check inputs and whether the category key exists, otherwise create it
-            if (categoryName && expense && !isNaN(cost)) {
-                if (!formData["categories"].hasOwnProperty(categoryName)) {
-                    formData["categories"][categoryName] = {};
-                }
-
-                // Add users expense and cost as key value pairs to the object
-                formData["categories"][categoryName][expense] = cost;
-            }
-        }
+        const submitButton = document.querySelector("button[type='submit']");
+        const route = submitButton.id;
 
         // Send a POST request to the /create view
-        let request = await fetch("/create", {
+        let request = await fetch(route, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -124,11 +63,11 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("response " + response[msg]);
         }
 
-        console.log(formData);
         console.log(JSON.stringify(formData));
     });
 });
 
+/* Enable accordion functionality on buttons */
 function enableAccordions(buttons) {
     for (let accordion of buttons) {
         accordion.addEventListener("click", function() {
@@ -141,15 +80,12 @@ function enableAccordions(buttons) {
             let icon = this.querySelector(".material-icons");
     
             // If category is open, close it
-            // if (item.style.display == "block") {
             if (item.classList.contains("enabled")) {
-                // item.style.display = "none";
                 item.classList.add("disabled");
                 item.classList.remove("enabled");
                 icon.textContent = "expand_more";
             // Else open it
             } else {
-                // item.style.display = "block";
                 item.classList.add("enabled");
                 item.classList.remove("disabled");
                 icon.textContent = "expand_less";
@@ -158,9 +94,8 @@ function enableAccordions(buttons) {
     }
 }
 
-// /* Delete inputs */
+/* Delete inputs */
 function removeInput(id) {
-    // this.parentElement.remove();
     const div = document.getElementById(id);
     div.remove();
 }
@@ -179,7 +114,7 @@ function preventNameCollision(input) {
 
 /* Check if an input value already exists */
 function valueExists(elem, select) {
-    let nodeList = document.querySelectorAll(select);
+    const nodeList = document.querySelectorAll(select);
     let exists = false;
 
     // Check existing input fields to see if value already exists, category specific
@@ -199,15 +134,15 @@ function valueExists(elem, select) {
             exists = true;
         }
     });
-    
+
     return exists;
 }
 
 /* Update the total result as user inputs costs */
 function updateResult(input) {
-    let nodeList = document.querySelectorAll("input[name='cost']");
+    const nodeList = document.querySelectorAll("input[name='cost']");
     let total;
-    let result = document.querySelector("#result");
+    const result = document.querySelector("#result");
 
     // Add event listener to each cost input
     input.addEventListener("input", function() {
@@ -229,47 +164,6 @@ function updateResult(input) {
         result.innerHTML = total.toFixed(2);
     });
 }
-
-/* // Create alert message to inform user of error
-function createAlert(error) {
-
-    clearAlert();
-
-    // Create alert element, showing the error message
-    if (error) {
-
-        // Get place to insert alert
-        let navbar = document.querySelector(".navbar");
-
-        // Create alert components
-        let div = document.createElement("div");
-        let ul = document.createElement("ul");
-        let li = document.createElement("li");
-
-        // Add attributes
-        div.classList.add("container");
-        div.role = "alert";
-
-        li.innerHTML = error;
-        li.classList.add("alert");
-
-        // Append elements to DOM
-        ul.appendChild(li);
-        div.appendChild(ul);
-        navbar.after(div);
-    }
-    return;
-}
-
-// Clear alert
-function clearAlert() {
-
-    // Remove existing alert
-    let alert = document.querySelector("div[role='alert']");
-    if (alert) {
-        alert.remove();
-    }
-} */
 
 /* Add functionality to pre-generated inputs to work the same as dynamically generated ones */
 function generatedInputs() {
@@ -375,7 +269,7 @@ function addInputs(buttons, created) {
             
             // Create div and append inputs
             const div = document.createElement("div");            
-            div.dataset.category = addButton.id;
+            div.dataset.category = addButton.parentElement.id;
             div.id = i;
             div.classList.add("created");
             
@@ -441,3 +335,74 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+/* Form data collection and formatting as JSON */
+// https://www.youtube.com/watch?v=DqyJFV7QJqc
+function formDataCollection(budgetName, budget, result) {
+
+    // Ensure there's a name for the budget
+    if (!budgetName) {
+        throw new Error("Missing budget name");
+    }
+
+    // Create initial object to append and nest other inputs in
+    let formData = {
+        "info": {
+        name: budgetName ? budgetName : null,
+        total: budget ? budget : null,
+        result: result ? result : null
+        },
+        "categories": {}
+    };
+
+    // Select the input rows that were added by the user
+    const created = document.querySelectorAll(".created");        
+
+    // Check that there were some inputs provided
+    if (created.length === 0) {
+        throw new Error("No categories or invalid/missing input");
+    }
+
+    // Had to use this since forEach method won't stop even if you return
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries#examples
+    // For each row of fields, get the expense and cost, adding them to the object
+    for (const [index, input] of created.entries()) {
+
+        // Get the category name so that specific expenses and costs can be assosciated with it
+        const categoryName = input.dataset.category;
+        let expense = input.querySelector("input[name='expense']").value.trim();
+        const cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
+
+        // If there's no cost in the input skip it
+        if (!cost || isNaN(cost)) {
+            continue;
+        }
+
+        // Check for name collisions and add the key to the object if they do
+        let inputColor = input.querySelector("input[name='expense']");
+
+        if (inputColor.style.backgroundColor === "red") {
+            // alert.create("Expense name collision(s), use unique names");
+            formData["collisions"] = true;
+            throw new Error("Expense name collision(s), use unique names");
+        } else if (!categoryName) {
+            throw new Error("Missing categories");
+        }
+
+        // If there's no expense name, create a generic one
+        if (!expense) {
+            expense = "expense" + (index + 1);
+        }
+
+        // Check inputs and whether the category key exists, otherwise create it
+        if (categoryName && expense && !isNaN(cost)) {
+            if (!formData["categories"].hasOwnProperty(categoryName)) {
+                formData["categories"][categoryName] = {};
+            }
+
+            // Add users expense and cost as key value pairs to the object
+            formData["categories"][categoryName][expense] = cost;
+        }
+    }
+    return formData;
+}
