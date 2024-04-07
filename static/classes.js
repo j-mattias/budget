@@ -1,6 +1,8 @@
 export class Alert {
 
     constructor(insertLoc) {
+
+        // Place to insert the alert element
         this.insertLoc = insertLoc;
     }
 
@@ -26,7 +28,6 @@ export class Alert {
         ul.appendChild(li);
         div.appendChild(ul);
         this.insertLoc.after(div);
-
     }
 
     /* Clear existing alert */
@@ -38,8 +39,4 @@ export class Alert {
             alert.remove();
         }
     }
-}
-
-export class FormControl {
-
 }

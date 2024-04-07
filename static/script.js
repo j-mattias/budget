@@ -2,9 +2,17 @@ import { Alert } from "./classes.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    // Select the form
+    const form = document.querySelector(".budget-form");
+
+    if (!form) {
+        return;
+    }
+
     const navbar = document.querySelector(".navbar");
     let alert = new Alert(navbar);
     alert.clear();
+
     generatedInputs();
     editForm();
 
@@ -20,9 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const addButtons = document.querySelectorAll(".add");
     const created = document.querySelectorAll(".created");
     addInputs(addButtons, created);
-
-    // Select the form
-    const form = document.querySelector(".budget-form");
 
     // Listen for the submit event
     form.addEventListener("submit", async function(event) {
@@ -106,7 +111,6 @@ function preventNameCollision(input) {
     input.addEventListener("input", function() {
         if (valueExists(input, "input[name='expense']")) {
             input.style.backgroundColor = "red";
-            // console.log("name exists");
         } else {
             input.style.backgroundColor = "";
         } 
