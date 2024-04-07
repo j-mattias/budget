@@ -30,8 +30,8 @@
                         <button type="button" class="add disabled" id="{{ category }}">Add Expense</button>
                         {% for note, cost in json.categories[category].items() %}
                             <div id="{{ count.value }}" class="created" data-category="{{ category }}">
-                                <input id="{{ count.value }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" disabled>
-                                <input type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" disabled>
+                                <input id="{{ count.value }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" data-category="{{ category }}" disabled>
+                                <input id="{{ count.value }}" type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" data-category="{{ category }}" disabled>
                                 <button class="delete disabled" type="button">-</button>
                             </div>
                             {% set count.value = count.value + 1 %}

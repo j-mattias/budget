@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const budgetName = document.querySelector("input[name='name']").value.trim();
         const budget = parseFloat(document.querySelector("input[name='budget']").value);
-        const result = parseFloat(document.querySelector("#result").innerHTML);
+        const result = calculateResult();
 
         // Collect data from form inputs, returns a JSON
         let formData;
@@ -138,30 +138,43 @@ function valueExists(elem, select) {
     return exists;
 }
 
+/* Calculate the result of all inputs named cost */
+function calculateResult() {
+    const costInputs = document.querySelectorAll("input[name='cost']");
+    const result = document.querySelector("#result");
+    let total = 0, value;
+
+    // For each input add value to total
+    costInputs.forEach((input) => {
+
+        // Select the input category to check if the div it's contained in is enabled or disabled
+        const category = input.dataset.category;
+        const item = document.querySelector(`div[id=${category}]`);
+
+        value = parseFloat(input.value);
+        
+        // Check that the value is a number
+        if (isNaN(value)) {
+            value = 0;
+        }
+
+        // Only count the value if the category isn't disbled
+        if (!item.classList.contains("disabled")) {
+            total += value;
+        }
+    });
+
+    // Update result display
+    result.innerHTML = total.toFixed(2);
+    return total;
+}
+
 /* Update the total result as user inputs costs */
 function updateResult(input) {
-    const nodeList = document.querySelectorAll("input[name='cost']");
-    let total;
-    const result = document.querySelector("#result");
 
     // Add event listener to each cost input
     input.addEventListener("input", function() {
-        total = 0;
-
-        // Check value of each cost input in the DOM, add values together
-        nodeList.forEach((node) => {
-            let value = parseFloat(node.value);
-
-            // Check that the value is a number
-            if (isNaN(value)) {
-                value = 0;
-            }
-
-            total += parseFloat(value);
-        });
-
-        // Limit display result to 2 decimal places
-        result.innerHTML = total.toFixed(2);
+        calculateResult();
     });
 }
 
@@ -260,12 +273,15 @@ function addInputs(buttons, created) {
             inputExpense.name = "expense";
             inputExpense.placeholder = "Expense";
             inputExpense.id = i;
+            inputExpense.dataset.category = addButton.parentElement.id;
             
             inputCost.type = "number";
             inputCost.name = "cost";
             inputCost.placeholder = "Cost";
             inputCost.step = "0.01";
             inputCost.min = "0.01";
+            inputCost.id = i;
+            inputCost.dataset.category = addButton.parentElement.id;
             
             // Create div and append inputs
             const div = document.createElement("div");            
@@ -302,14 +318,13 @@ function addInputs(buttons, created) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    
+
     // Select all the checkboxes
     const checkedCategories = document.querySelectorAll("input[type='checkbox']");
 
     // Add an event listener for "change" on each checkbox
     checkedCategories.forEach((box) => {
         box.addEventListener("change", () => {
-
             // Select the accordion that's associated with the checkbox id
             let accordion = document.querySelector(`button[id='${box.id}']`);
 
@@ -332,9 +347,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 accordion.nextElementSibling.classList.remove("enabled");
                 accordion.nextElementSibling.classList.add("disabled");
             }
+
+            calculateResult();
         });
     });
 });
+
+/* nodeList.forEach((node) => {
+    console.log(node.parentNode.dataset.category);
+    let x = node.parentNode.dataset.category;
+    let u = document.querySelector(`div[id='${x}']`);
+    console.log("u ->", u);
+    let reduce = 0;
+    console.log(node);
+    if (u.classList.contains("disabled")) {
+        reduce += parseFloat(node.value);
+        console.log(node.value);
+    }
+    // result.innerHTML = (parseFloat(result.value) - reduce).toFixed(2);
+}); */
 
 /* Form data collection and formatting as JSON */
 // https://www.youtube.com/watch?v=DqyJFV7QJqc
