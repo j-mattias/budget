@@ -2,6 +2,53 @@ import { Alert } from "./classes.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
+    const dialog = document.querySelector("dialog");
+
+    // Only run if dialog element is present
+    if (dialog) {
+
+        const showButtons = document.querySelectorAll("#delete");
+        const cancelButton = document.querySelector("#cancel");
+        // const formDelete = document.querySelector("#delete-budget");
+        const inputDelete = document.querySelector("#modal-input");
+        const span = document.querySelector("dialog span");
+        
+        // For each delete button, get budget name and id associated with clicked button to
+        // assign dataset contents to span and form input element, then show the modal
+        showButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                span.innerHTML = button.dataset.budgetName;
+                // formDelete.action = "/delete";
+                // formDelete.method = "post";
+                inputDelete.value = button.dataset.budgetId;
+                dialog.showModal();
+            });
+        });
+    
+        // Close the modal if cancel button is clicked
+        cancelButton.addEventListener("click", () => {
+            dialog.close();
+        });
+    
+        // Listen for clicks outside of the active modal window, close window if clicking outside
+        dialog.addEventListener("click", (event) => {
+            console.log("event ->" ,event, "event target ->", event.target);
+    
+            // https://www.youtube.com/watch?v=ywtkJkxJsdg
+            // Get dialog dimensions, if a click happens outside of the modal, close it
+            const dialogDimensions = dialog.getBoundingClientRect();
+            
+            if (event.clientX < dialogDimensions.left ||
+                event.clientX > dialogDimensions.right ||
+                event.clientY < dialogDimensions.top ||
+                event.clientY > dialogDimensions.bottom) 
+                {
+                dialog.close();
+            }
+        });
+    }
+
     // Select the form
     const form = document.querySelector(".budget-form");
 
@@ -39,10 +86,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const budget = parseFloat(document.querySelector("input[name='budget']").value);
         const result = calculateResult();
 
+        // Check if there's a budget id stored
+        let budget_id = document.querySelector("input[name='id']");
+        const id = budget_id ? budget_id.value : null;
+
         // Collect data from form inputs, returns a JSON
         let formData;
         try {
-            formData = formDataCollection(budgetName, budget, result);
+            formData = formDataCollection(budgetName, budget, result, id);
         } catch (e) {
             alert.create(e.message);
         }
@@ -64,9 +115,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Get response from server
         let response = await request.json();
-        for (let msg in response) {
-            alert.create(response[msg]);
-            console.log("response " + response[msg]);
+
+        // Redirect if a url was returned, show message if not
+        if (response.url) {
+            window.location.href = response.url;
+        } else {
+            for (let msg in response) {
+                alert.create(response[msg]);
+                console.log("response " + response[msg]);
+            }
         }
 
         console.log(JSON.stringify(formData));
@@ -359,7 +416,7 @@ function checkboxFilter(checkboxes) {
 
 /* Form data collection and formatting as JSON */
 // https://www.youtube.com/watch?v=DqyJFV7QJqc
-function formDataCollection(budgetName, budget, result) {
+function formDataCollection(budgetName, budget, result, id) {
 
     // Ensure there's a name for the budget
     if (!budgetName) {
@@ -371,7 +428,8 @@ function formDataCollection(budgetName, budget, result) {
         "info": {
         name: budgetName ? budgetName : null,
         total: budget ? budget : null,
-        result: result ? result : null
+        result: result ? result : null,
+        id: id ? id : null
         },
         "categories": {}
     };
@@ -393,6 +451,11 @@ function formDataCollection(budgetName, budget, result) {
         const categoryName = input.dataset.category;
         let expense = input.querySelector("input[name='expense']").value.trim();
         const cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
+
+        // If a category is disabled, don't include it
+        if (input.parentElement.classList.contains("disabled")) {
+            continue;
+        }
 
         // If there's no cost in the input skip it
         if (!cost || isNaN(cost)) {

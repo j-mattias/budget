@@ -21,6 +21,7 @@
         <form class="budget-form">
             <input autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" disabled>
             <input autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01" value="{{ json.info.total }}" disabled>
+            <input name="id" value="{{ json.info.id }}" hidden>
             <!-- https://jinja.palletsprojects.com/en/3.0.x/templates/#jinja-globals.namespace -->
             {% set count = namespace(value=0) %}
             {% for category in categories %}
@@ -46,7 +47,7 @@
             {% endfor %}
             <label class="result">Result: <span id="result">{{ json.info.result }}</span></label>
             <button id="edit" type="button">Edit</button>
-            <button type="submit" id="/update" disabled>Save</button>
+            <button type="submit" id="/update">Save</button>
             {{ json.info.id }}
         </form>
     </div>

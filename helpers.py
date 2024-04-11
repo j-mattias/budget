@@ -17,3 +17,36 @@ def login_required(func):
         return func(*args, **kwargs)
     
     return decorated_function
+
+def form_data_error(form, valid_categories):
+
+    error = None
+    budget = form.get("info")
+    expenses = form.get("categories")
+
+    # Check for budget name and collisions
+    if not budget.get("name"):
+        error = "Missing budget name"
+    elif form.get("collisions"):
+        error = "Expense name collision(s), use unique names"
+    elif not expenses:
+        error = "Missing categories"
+
+    # Check that categories and inputs fields are valid
+    for key in expenses.keys():
+        
+        # Check for valid categories
+        if not key or key not in valid_categories:
+            error = "Invalid categories"
+
+        # Check for valid category value (dict of expenses)
+        elif not expenses[key]:
+            error = "Invalid/missing input"
+
+        # Check for valid cost input
+        for expense in expenses[key]:
+            amount = expenses[key][expense]
+            if not amount:
+                error = "Missing cost value for one or more inputs"
+
+    return error

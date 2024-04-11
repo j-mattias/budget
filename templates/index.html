@@ -3,11 +3,13 @@
 {% block title %}Index{% endblock %}
 
 {% block body %}
+    <form action="/delete" method="post" id="form-delete"></form>
     <table>
         <thead>
             <tr>
                 <td>Budget</td>
                 <td>Created</td>
+                <td>Delete</td>
             </tr>
         </thead>
         <tbody>
@@ -16,8 +18,20 @@
                     <td><a href="{{ url_for('budget', id=budget.id ) }}">{{ budget.name }}</a></td>
                     <!-- https://stackoverflow.com/questions/4830535/how-do-i-format-a-date-in-jinja2 -->
                     <td>{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}</td>
+                    <!-- <td><input name="id" form="form-delete" hidden value="{{ budget.id }}"><button type="submit" form="form-delete">Delete {{ budget.id }}</button></td> -->
+                    <td><button id="delete" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}">Delete</button></td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    <dialog>
+        <div>
+            <h1>Delete: <span id="budget-name"></span>?</h1>
+            <form id="delete-budget" action="/delete" method="post">
+                <input name="id" id="modal-input" hidden>
+                <button type="submit" autofocus>Confirm</button>
+            </form>
+            <button type="button" id="cancel">Cancel</button>
+        </div>
+    </dialog>
 {% endblock %}

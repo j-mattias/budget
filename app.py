@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, session, redirect, flash, url
 from flask_session import Session
 from db_models import *
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import login_required
+from helpers import login_required, form_data_error
 from validator_collection import checkers
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from datetime import timedelta
@@ -104,18 +104,8 @@ def create():
         budget = form.get("info")
         expenses = form.get("categories")
 
-        # Check for budget name and collisions
-        if not budget.get("name"):
-            error = "Missing budget name"
-        elif form.get("collisions"):
-            error = "Expense name collision(s), use unique names"
-        elif not expenses:
-            error = "Missing categories"
-
-        # Check for valid categories
-        for key in expenses.keys():
-            if not key or key not in CATEGORIES:
-                error = "Invalid categories or invalid/missing input"
+        # Check for errors in the form
+        error = form_data_error(form, CATEGORIES)
 
         # Try to add the budget to the database
         try:
@@ -140,9 +130,6 @@ def create():
             for expense in expenses[category]:
                 amount = expenses[category][expense]
 
-                if not amount:
-                    error = "Missing cost value for one or more inputs"
-
                 # Try to add expense to database
                 try:
                     new_expense = Expense(
@@ -160,14 +147,111 @@ def create():
         # If there was no error, commit the transactions to the database
         if error is None:
             db.session.commit()
-            return jsonify({"response": "Data submitted"})
-            return redirect(url_for("index"))
+            # return jsonify({"response": "Data submitted"})
+            return jsonify({"url": url_for("index")})
         
         # If something went wrong, return the error message to display
         return jsonify({"response": error})
 
     else:
         return render_template("create.html", categories=CATEGORIES)
+
+
+@app.route("/update", methods=["POST"])
+def update():
+
+    error = None
+    
+    # Get the form data that was submitted
+    form = request.json
+
+    # Break it up into budget and expense data for convenience
+    budget = form.get("info")
+    expenses = form.get("categories")
+
+    # Check for errors in the form
+    error = form_data_error(form, CATEGORIES)
+
+    # Select budget by id and user_id
+    try:
+        cur_budget = db.session.execute(
+                db.select(Budget)
+                .where((Budget.id == budget.get("id")) &
+                    (Budget.user_id == session["user_id"])
+                    )).scalar_one()
+    except NoResultFound:
+        error = "Budget could not be found"
+
+    # Update name, budget, result
+    if cur_budget.name != budget.get("name"):
+        cur_budget.name = budget.get("name")
+
+    if cur_budget.budget != budget.get("total"):
+        cur_budget.budget = budget.get("total")
+
+    if cur_budget.result != budget.get("result"):
+        cur_budget.result = budget.get("result")
+    
+    # Could have updated expenses if expense id was saved in the json, but seems unnecessary
+    # when there's not budget or expense history being stored
+   
+    # Delete expenses previous expenses (not committed yet)
+    for expense in cur_budget.expenses:
+        db.session.delete(expense)
+            
+    # Loop through categories, and expenses inside them
+    for category in expenses.keys():
+        for expense in expenses[category]:
+            amount = expenses[category][expense]
+
+            # Try to add expense to database
+            try:
+                new_expense = Expense(
+                    budget_id=cur_budget.id,
+                    category=category,
+                    note=expense,
+                    amount=amount
+                )
+                db.session.add(new_expense)
+            except IntegrityError:
+                db.session.rollback()
+                error = "Data could not be saved"
+                break
+
+    # If there was no error commit and send where to redirect since Flask redirect
+    # won't work when using fetch
+    if error is None:
+        db.session.commit()
+        return jsonify({"url": url_for("budget", id=cur_budget.id)})
+
+    # If there was an error rollback changes and return an error response
+    db.session.rollback()
+    return jsonify({"response": error})
+
+
+@app.route("/delete", methods=["POST"])
+def delete():
+
+    # Select the form input with name id
+    id = request.form.get("id")
+
+    # Select the budget with the selected id, and make sure user_id matches
+    try:
+        budget = db.session.execute(
+                db.select(Budget)
+                .where((Budget.id == id) & 
+                (Budget.user_id == session["user_id"])
+                )).scalar_one()
+    except NoResultFound:
+        flash("Budget was not found")
+        return redirect("/")
+
+    # Delete the budget from the database
+    db.session.delete(budget)
+    db.session.commit()
+
+    # Redirect to show the new list of budgets
+    return redirect("/")
 
 
 @app.route("/account")

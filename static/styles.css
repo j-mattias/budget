@@ -164,3 +164,14 @@ form > button {
 .enabled {
     display: block;
 }
+
+::backdrop {
+    backdrop-filter: blur(5px);
+}
+
+dialog {
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: var(--nav-hover);
+    padding: 10px;
+}
