@@ -158,6 +158,7 @@ def create():
 
 
 @app.route("/update", methods=["POST"])
+@login_required
 def update():
 
     error = None
@@ -230,6 +231,7 @@ def update():
 
 
 @app.route("/delete", methods=["POST"])
+@login_required
 def delete():
 
     # Select the form input with name id
@@ -255,8 +257,105 @@ def delete():
 
 
 @app.route("/account")
+@login_required
 def account():
-    return "Account route"
+
+    error = None
+
+    # Select current user
+    try:
+        USER = db.session.execute(db.select(User).where(User.id == session["user_id"])).scalar_one()
+    except NoResultFound:
+        error = "User not found"
+
+    if error:
+        flash(error)
+
+    return render_template("account.html", user=USER)
+
+
+@app.route("/delete-account", methods=["POST"])
+@login_required
+def delete_account():
+
+    error = None
+
+    password = request.form.get("password")
+
+    if not password:
+        error = "Please provide a password"
+
+    # Select the current user
+    try:
+        USER = db.session.execute(db.select(User).where(User.id == session["user_id"])).scalar_one()
+    except NoResultFound:
+        error = "User not found"
+
+    # Ensure the correct password is provided before deleting
+    if not check_password_hash(USER.password, password):
+        error = "Incorrect password"
+
+    # If there are no errors delete the users account
+    if error is None:
+        db.session.delete(USER)
+        db.session.commit()
+
+        # Clear the session before flashing message, since it's stored in the session
+        session.clear()
+        flash("Your account has been deleted")
+        return render_template("login.html")
+    
+    flash(error)
+    return redirect(url_for("account"))
+
+
+@app.route("/change-password", methods=["POST"])
+@login_required
+def change_password():
+
+    error = None
+
+    old = request.form.get("old")
+    new = request.form.get("new")
+    confirm = request.form.get("confirm")
+
+    # based on https://regexr.com/3bfsi
+    # Check password has at least: 1 lowercase letter, 1 uppercase letter, 1 digit, 1 symbol, min 8 char length
+    match = re.search(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]).{8,}$", new)
+
+    # Error check password inputs
+    if not old:
+        error = "Please enter a password"
+    elif not new:
+        error = "Please enter a new password"
+    elif new != confirm:
+        error = "Passwords do not match"
+    elif not match:
+        error = """
+                Password needs to be at least 8 characters and contain at least one lowercase letter, 
+                one uppercase letter, one digit and one symbol ( !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~)
+                """
+    try:
+        USER = db.session.execute(db.select(User).where(User.id == session["user_id"])).scalar_one()
+    except NoResultFound:
+        error = "User not found"
+
+    # Make sure the correct old password was entered
+    if not check_password_hash(USER.password, old):
+        error = "Incorrect old password"
+
+    # If there were no errors update the password
+    if error is None:
+
+        # Update password in db
+        USER.password = generate_password_hash(new)
+        db.session.commit()
+
+        flash("Password has been changed")
+        return redirect(url_for("account"))
+
+    flash(error)
+    return redirect(url_for("account"))
 
 
 @app.route("/logout")
@@ -274,7 +373,7 @@ def login():
     if request.method == "POST":
 
         # Get user input
-        user = request.form.get("username").lower()
+        username = request.form.get("username").lower()
         password = request.form.get("password")
 
         error = None
@@ -282,10 +381,10 @@ def login():
         try:
             # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
             # Select based on either username or email, raises error if not found
-            user = db.session.execute(db.select(User).where((User.username_lower==user) | (User.email==user))).scalar_one()
+            USER = db.session.execute(db.select(User).where((User.username_lower==username) | (User.email==username))).scalar_one()
             
             # Check password
-            if not check_password_hash(user.password, password):
+            if not check_password_hash(USER.password, password):
                 error = "Incorrect password"
                 
         except NoResultFound:
@@ -293,7 +392,7 @@ def login():
 
         # If there was no error, start the session and redirect the
         if error is None:
-            session["user_id"] = user.id
+            session["user_id"] = USER.id
             return redirect(url_for("index"))
         
         flash(error)
@@ -341,22 +440,26 @@ def register():
         # Try to insert into db, if an entry already exists catch the error and rollback the transaction
         if error is None:
             try:
-                user = User(
+                USER = User(
                     username=username, 
                     username_lower=username.lower(), 
                     password=generate_password_hash(password), 
                     email=email.lower()
                     )
-                db.session.add(user)
-                db.session.commit()
-                flash("Welcome! You're now registered.")
-                return redirect(url_for("login"))
+                db.session.add(USER)
             
             except IntegrityError:
 
                 # Revert uncommitted changes made to the session
                 db.session.rollback()
                 error = "Username and/or email is already taken"
+
+            db.session.commit()
+
+            # Using render_template since redirect seems to "consume" the flash message,
+            # even tho redirect seems to work in change password route
+            flash("Welcome! You're now registered.")
+            return render_template("login.html")
         
         # Display error message
         flash(error)

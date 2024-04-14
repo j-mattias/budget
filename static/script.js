@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const showButtons = document.querySelectorAll("#delete");
         const cancelButton = document.querySelector("#cancel");
-        // const formDelete = document.querySelector("#delete-budget");
         const inputDelete = document.querySelector("#modal-input");
         const span = document.querySelector("dialog span");
         
@@ -18,10 +17,17 @@ document.addEventListener("DOMContentLoaded", function () {
         // assign dataset contents to span and form input element, then show the modal
         showButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                span.innerHTML = button.dataset.budgetName;
-                // formDelete.action = "/delete";
-                // formDelete.method = "post";
-                inputDelete.value = button.dataset.budgetId;
+
+                // If it's for deleting a budget
+                if (dialog.id === "delete") {
+                    span.innerHTML = button.dataset.budgetName;
+                    inputDelete.value = button.dataset.budgetId;
+                } 
+                
+                // If it's for deleting an account
+                else if (dialog.id == "account") {
+                    span.innerHTML = "account";
+                }
                 dialog.showModal();
             });
         });
