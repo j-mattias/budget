@@ -1,12 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-    --main-color: #0b0814;
+    --main-color: #131214;
+    --secondary-color: rgba(15, 85, 216, 0.1);
     --text-color: rgb(243, 243, 243);
-    --nav-hover: #7751ff;   
-    --logo-color: rgba(119, 81, 255, 1);
-    --input-color: #7751ff;  
-    --button-hover: rgba(119, 81, 255, 0.7);
+    --text-faded: rgba(211, 211, 211, 0.2);
+    --logo-color: rgb(15, 85, 216);
+    --input-bg-color: rgba(175, 175, 175, 0.1);
+    --button-hover: rgba(15, 85, 216, 0.8);
+    --disabled: rgba(114, 114, 114, 0.2);
+    --border-disabled: rgba(189, 189, 189, 0.2);
 }
 
 /* Defaults */
@@ -18,16 +21,26 @@
     font-style: normal;
     font-optical-sizing: auto;
     font-size: 20px;
+    margin: 0px 0px 0px 0px;
 }
 
 /* Container */
 .container {
+    margin: auto;
+    width: 100%;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    /* temp for visuals */
-    border-style: solid;
-    border-width: thin;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.border {
+    border: thin solid var(--border-disabled);
+    border-radius: 8px;
+    padding: 20px;
+    width: clamp(20ch, 15%, 25%);
 }
 
 ul {
@@ -35,96 +48,125 @@ ul {
     list-style: none;
 }
 
+input[name="expense"],
+input[name="cost"] {
+    width: clamp(10%, 35%, 40%);
+}
+
+h2 {
+    font-weight: 600;
+    margin: 5px 0px;
+}
+
+.fa-trash-can {
+    background: none;
+    font-size: 16px;
+}
+
+.fa-angle-up, .fa-angle-down {
+    background: none;
+}
+
 /* Navbar */
 .navbar {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 0 5%;
+    padding: 1rem 0px;
+    margin: auto;
+    margin-bottom: 20px;
+    width: 50%;
+    background: none;
+}
+
+.navbar-bg {
+    background-color: var(--disabled);
+    width: 100%;
+    height: 5ch;
+    box-shadow: 0px 3px 5px 5px rgba(0, 0, 0, 0.3);
 }
 
 .navbar li {
-    padding: 0px 0px 0px 10px;
+    padding: 0px 0px 0px 20px;
+    background: none;
 }
 
 .navbar li a {
     transition: all 0.1s ease 0s;
     text-decoration: none;
+    background: none;
 }
 
 .navbar ul {
     display: flex;
     padding: 0;
+    background: none;
 }
 
 .navbar li a:hover {
-    color: var(--nav-hover);
+    color: var(--button-hover);
 }
 
+/* Logo */
 .logo {
     color: var(--logo-color);
     text-decoration: none;
     font-weight: 800;
     margin-right: auto;
+    background: none;
 }
 
 /* Budget input */
 .accordion {
-    background-color: var(--logo-color);
+    /* background-color: var(--logo-color); */
     width: 100%;
-    text-align: left;
-    /* text-transform: capitalize; */
-    margin: 1px;
+    border-radius: 0px;
+    padding: 8px 10px;
+    margin: 2px 0px 0px;
+    /* text-align: left; */
+    /* Make these square, and have buttons be rounded */
 }
 
 .active {
-    background-color: var(--button-hover);
+    background-color: var(--logo-color);
 }
 
+/* For showing/hiding accordion inner content */
 .item {
     display: none;
     overflow: hidden;
 }
 
-.material-icons.md-20 { 
-    font-size: 20px; 
-}
-
-.material-icons {
-    color:white;
-    background: none;
-    float: right;
-}
-
 .add {
-    float: bottom;
-    width: 100%;
+    width: fit-content;
+    margin: 5px 0px 3px;
 }
 
 /* Inputs */
 input {
-    background-color: rgba(175, 175, 175, 0.1);
+    background-color: var(--input-bg-color);
     border: none;
-    margin: 10px 0;
+    border-bottom: 2px solid;
+    border-color: var(--logo-color);
+    margin: 0px 0px 5px 0px;
     padding: 8px 12px;
-    border-radius: 8px;
     font-size: 16px;
     outline-style: none;
 }
 
 input:focus {
-    background-color: var(--input-color);
+    background-color: var(--secondary-color);
 }
 
 button {
-    background-color: var(--logo-color);
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    text-transform: uppercase;
-    margin-top: 10px;
+    background-color: var(--secondary-color);
+    padding: 8px 25px;
+    border: 1px solid;
+    border-color: var(--logo-color);
+    border-radius: 60px;
+    text-transform: capitalize;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
 }
 
@@ -136,6 +178,45 @@ form > button {
     display: flex;
     margin-left: auto;
     margin-right: auto;
+    justify-content: space-between;
+}
+
+#password-form input {
+    display: flex;
+}
+
+/* Display checkboxes as "pills" */
+input[type="checkbox"] {
+    display: none;
+}
+
+.box {
+    display: inline-block;
+    padding: 8px 25px;
+    margin: 2px;
+    border: 1px solid;
+    border-radius: 60px;
+    border-color: var(--logo-color);
+    background-color: var(--secondary-color);
+    cursor: pointer;
+    text-transform: capitalize;
+    font-size: 16px;
+}
+
+.box:hover, input[type="checkbox"]:checked + .box:hover{
+    background-color: var(--button-hover);
+}
+
+input[type="checkbox"]:checked + .box {
+    background-color: var(--logo-color);
+}
+
+input[type="checkbox"]:disabled + .box,
+input[type="checkbox"]:disabled + .box:hover {
+    background-color: var(--disabled);
+    border-color: var(--border-disabled);
+    color: var(--text-faded);
+    cursor: not-allowed;
 }
 
 .budget-form {
@@ -157,6 +238,7 @@ form > button {
     font-size: 16px;
 }
 
+/* For accordions showing/hiding, used in script.js */
 .disabled {
     display: none;
 }
@@ -165,6 +247,7 @@ form > button {
     display: block;
 }
 
+/* Backdrop for when dialog window opens */
 ::backdrop {
     backdrop-filter: blur(5px);
 }
@@ -172,6 +255,58 @@ form > button {
 dialog {
     border-radius: 8px;
     border-width: 2px;
-    border-color: var(--nav-hover);
-    padding: 10px;
+    border-color: var(--logo-color);
+    padding: 20px;
+    margin: auto;
+}
+
+/* Container for budget information and delete button */
+.list {
+    display: flex;
+    width: clamp(25ch, 25%, 25%);
+    border: 1px solid var(--border-disabled);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+/* Change style for buttons inside list */
+.list > button {
+    border: none;
+    background: none;
+    padding: 8px 20px;
+}
+
+.btn-delete:hover .fa-trash-can {
+    color: red;
+}
+
+.list:nth-child(odd) {
+    background-color: var(--disabled);
+}
+
+.list:hover {
+    background-color: var(--button-hover);
+}
+
+/* Container for budget information */
+.list-item {
+    flex-grow: 1;
+    background: none;
+}
+
+/* Add datetime after budget name */
+.list-item a::after {
+    content: attr(data-date-time);
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Make link easier to click by filling it out more, move datetime to end */
+.list-item a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0 6px 15px;
+    text-decoration: none;
+    background: none;
 }

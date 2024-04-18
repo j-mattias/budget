@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block body %}
+    <h2>Categories</h2>
     <div class="container" id="category-form">
         <form class="category-form">
             {% for category in categories %}
@@ -13,10 +14,11 @@
                 {% else %}
                     <input type="checkbox" name="{{ category }}" id="{{ category }}" disabled>
                 {% endif %}
-                <label for="{{ category }}">{{ category }}</label>
+                <label class="box" for="{{ category }}">{{ category }}</label>
             {% endfor %}
         </form>
     </div>
+    <h2>Budget</h2>
     <div class="container" id="budget-form">
         <form class="budget-form">
             <input autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" disabled>
@@ -26,14 +28,14 @@
             {% set count = namespace(value=0) %}
             {% for category in categories %}
                 {% if category in json.categories %}
-                    <button class="accordion active" type="button" id="{{ category }}">{{ category }}<i class="material-icons md-20">expand_less</i></button>
+                    <button class="accordion active" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-up"></i></button>
                     <div class="item enabled" id="{{ category }}">
                         <button type="button" class="add disabled" id="{{ category }}">Add Expense</button>
                         {% for note, cost in json.categories[category].items() %}
                             <div id="{{ count.value }}" class="created" data-category="{{ category }}">
                                 <input id="{{ count.value }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" data-category="{{ category }}" disabled>
                                 <input id="{{ count.value }}" type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" data-category="{{ category }}" disabled>
-                                <button class="delete disabled" type="button">-</button>
+                                <button class="delete disabled" type="button"><i class="fa-regular fa-trash-can"></i></button>
                             </div>
                             {% set count.value = count.value + 1 %}
                         {% endfor %}
@@ -52,5 +54,3 @@
         </form>
     </div>
 {% endblock %}
-
-<!-- data-accordion-category="{{ category }}" -->

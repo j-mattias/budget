@@ -5,11 +5,13 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h3>Account: {{ user.username }}</h3>
-        <h3>Email: {{ user.email }}</h3>
+    <h2>Account Info</h2>
+    <div class="container border">
+        <div>Username: {{ user.username }}</div>
+        <div>Email: {{ user.email }}</div>
     </div>
-    <div class="container">
+    <h2>Change Password</h2>
+    <div class="container border">
         <form id="password-form" action="/change-password" method="post">
             <input name="old" placeholder="Old password" required type="password">
             <input name="new" placeholder="New password" required type="password">
@@ -17,14 +19,14 @@
             <button type="submit">Save</button>
         </form>
     </div>
-    <div class="container">
-        <h1>Delete account</h1>
+    <h2>Delete Account</h2>
+    <div class="container border">
         <button id="delete">Delete</button>
     </div>
 
     <dialog id="account">
-        <div>
-            <h1>Delete <span></span>?</h1>
+        <div class="container">
+            <h2>Delete <span></span>?</h2>
             <form id="account-form" action="/delete-account" method="post">
                 <input name="password" placeholder="Password" required type="password" autofocus>
                 <button type="submit">Confirm</button>

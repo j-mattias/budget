@@ -4,26 +4,18 @@
 
 {% block body %}
     <form action="/delete" method="post" id="form-delete"></form>
-    <table>
-        <thead>
-            <tr>
-                <td>Budget</td>
-                <td>Created</td>
-                <td>Delete</td>
-            </tr>
-        </thead>
-        <tbody>
-            {% for budget in budgets %}
-                <tr>
-                    <td><a href="{{ url_for('budget', id=budget.id ) }}">{{ budget.name }}</a></td>
-                    <!-- https://stackoverflow.com/questions/4830535/how-do-i-format-a-date-in-jinja2 -->
-                    <td>{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}</td>
-                    <td><button id="delete" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}">Delete</button></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <dialog id="delete">
+
+    <h2>Budgets</h2>
+    {% for budget in budgets %}
+        <div class="list">
+            <div class="list-item">
+                <a href="{{ url_for('budget', id=budget.id ) }}" data-date-time="{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}">{{ budget.name }}</a>
+            </div>
+            <button class="btn-delete" id="delete" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}"><i class="fa-regular fa-trash-can"></i></button>
+        </div>
+    {% endfor %}
+    
+    <dialog id="budgets">
         <div>
             <h1>Delete: <span id="budget-name"></span>?</h1>
             <form id="delete-budget" action="/delete" method="post">

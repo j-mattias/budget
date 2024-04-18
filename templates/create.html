@@ -3,20 +3,22 @@
 {% block title %}Create{% endblock %}
 
 {% block body %}
+    <h2>Categories</h2>
     <div class="container" id="category-form">
         <form class="category-form">
             {% for category in categories %}
                 <input type="checkbox" name="{{ category }}" id="{{ category }}" checked>
-                <label for="{{ category }}">{{ category }}</label>
+                <label class="box" for="{{ category }}">{{ category }}</label>
             {% endfor %}
         </form>
     </div>
+    <h2>Budget</h2>
     <div class="container" id="budget-form">
         <form class="budget-form">
             <input autocomplete="off" name="name" placeholder="Budget name..." type="text">
             <input autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01">
             {% for category in categories %}
-                <button class="accordion" type="button" id="{{ category }}">{{ category }}<i class="material-icons md-20">expand_more</i></button>
+                <button class="accordion" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-down"></i></button>
                 <div class="item" id="{{ category }}">
                     <button type="button" class="add">Add Expense</button>
                 </div>

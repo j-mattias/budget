@@ -5,28 +5,31 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="/static/styles.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
         <script type="module" src="/static/script.js"></script>
+        <script src="https://kit.fontawesome.com/bd321f6b9e.js" crossorigin="anonymous"></script>
 
         <title>Budget - {% block title %}{% endblock %}</title>
     </head>
     <body>
-        <nav class="navbar">
-            <a class="logo" href="{{ url_for('index') }}">Budget</a>
-            {% if session["user_id"] %}
-                <ul>
-                    <li><a href="{{ url_for('create') }}">Create</a></li>
-                    <li><a href="{{ url_for('account') }}">Account</a></li>
-                </ul>
-                <ul>
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                </ul>
-            {% else %}
-                <ul>
-                    <li><a href="{{ url_for('login') }}">Log in</a></li>
-                    <li><a href="{{ url_for('register') }}">Register</a></li>
-                </ul>
-            {% endif %}
+        <nav class="navbar-bg">
+            <div class="navbar">
+                <a class="logo" href="{{ url_for('index') }}">Budget</a>
+                {% if session["user_id"] %}
+                    <ul>
+                        <li><a href="{{ url_for('create') }}">Create</a></li>
+                        <li><a href="{{ url_for('account') }}">Account</a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    </ul>
+                {% else %}
+                    <ul>
+                        <li><a href="{{ url_for('login') }}">Log in</a></li>
+                        <li><a href="{{ url_for('register') }}">Register</a></li>
+                    </ul>
+                {% endif %}
+            </div>
         </nav>
 
         {% if get_flashed_messages() %}

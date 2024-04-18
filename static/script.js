@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.addEventListener("click", () => {
 
                 // If it's for deleting a budget
-                if (dialog.id === "delete") {
+                if (dialog.id === "budgets") {
                     span.innerHTML = button.dataset.budgetName;
                     inputDelete.value = button.dataset.budgetId;
                 } 
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    const navbar = document.querySelector(".navbar");
+    const navbar = document.querySelector(".navbar-bg");
     let alert = new Alert(navbar);
     alert.clear();
 
@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
             formData = formDataCollection(budgetName, budget, result, id);
         } catch (e) {
             alert.create(e.message);
+            return;
         }
         console.log(formData);
 
@@ -146,18 +147,20 @@ function enableAccordions(buttons) {
     
             // Select the item class, the sibling of accordion
             let item = this.nextElementSibling;
-            let icon = this.querySelector(".material-icons");
+            let icon = this.querySelector(".accordion > .fa-solid");
     
             // If category is open, close it
             if (item.classList.contains("enabled")) {
                 item.classList.add("disabled");
                 item.classList.remove("enabled");
-                icon.textContent = "expand_more";
+                icon.classList.remove("fa-angle-up");
+                icon.classList.add("fa-angle-down");
             // Else open it
             } else {
                 item.classList.add("enabled");
                 item.classList.remove("disabled");
-                icon.textContent = "expand_less";
+                icon.classList.remove("fa-angle-down");
+                icon.classList.add("fa-angle-up");
             }
         });
     }
@@ -363,7 +366,8 @@ function addInputs(buttons, created) {
             // Add a button to remove inputs
             const removeButton = document.createElement("button");
             removeButton.type = "button";
-            removeButton.textContent = "-";
+            removeButton.innerHTML = '<i class="fa-regular fa-trash-can"></i>';
+            // removeButton.textContent = "-";
             removeButton.classList.add("delete");
             removeButton.addEventListener("click", () => {
                 removeInput(div.id);
