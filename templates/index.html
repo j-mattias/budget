@@ -16,8 +16,8 @@
     {% endfor %}
     
     <dialog id="budgets">
-        <div>
-            <h1>Delete: <span id="budget-name"></span>?</h1>
+        <div class="dialog-container">
+            <h3>Delete: <span id="budget-name"></span>?</h3>
             <form id="delete-budget" action="/delete" method="post">
                 <input name="id" id="modal-input" hidden>
                 <button type="submit" autofocus>Confirm</button>

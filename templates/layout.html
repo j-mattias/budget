@@ -12,22 +12,21 @@
         <title>Budget - {% block title %}{% endblock %}</title>
     </head>
     <body>
-        <nav class="navbar-bg">
-            <div class="navbar">
+        <nav class="navbar">
+            <input type="checkbox" id="sidebar-toggle">
+            <label for="sidebar-toggle" class="open-sidebar"><i class="fa-solid fa-bars"></i></label>
+            
+            <label id="overlay" for="sidebar-toggle"></label>
+            <div class="nav-links">
+                <label for="sidebar-toggle" class="close-sidebar"><i class="fa-solid fa-xmark"></i></label>
                 <a class="logo" href="{{ url_for('index') }}">Budget</a>
                 {% if session["user_id"] %}
-                    <ul>
-                        <li><a href="{{ url_for('create') }}">Create</a></li>
-                        <li><a href="{{ url_for('account') }}">Account</a></li>
-                    </ul>
-                    <ul>
-                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                    </ul>
+                    <a href="{{ url_for('create') }}">Create</a>
+                    <a href="{{ url_for('account') }}">Account</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
-                    <ul>
-                        <li><a href="{{ url_for('login') }}">Log in</a></li>
-                        <li><a href="{{ url_for('register') }}">Register</a></li>
-                    </ul>
+                    <a href="{{ url_for('login') }}">Log in</a>
+                    <a href="{{ url_for('register') }}">Register</a>
                 {% endif %}
             </div>
         </nav>

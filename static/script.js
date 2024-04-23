@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    const navbar = document.querySelector(".navbar-bg");
+    const navbar = document.querySelector(".navbar");
     let alert = new Alert(navbar);
     alert.clear();
 
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
     enableAccordions(accordions);
 
     // Select all the checkboxes
-    const checkedCategories = document.querySelectorAll("input[type='checkbox']");
+    const checkedCategories = document.querySelectorAll(".checkbox-filter");
     checkboxFilter(checkedCategories);
     
     const addButtons = document.querySelectorAll(".add");
@@ -404,9 +404,11 @@ function checkboxFilter(checkboxes) {
             // If the accordion doesn't have the class "active" toggle it
             if (!accordion.classList.contains("active")) {
                 accordion.classList.toggle("active");
-                accordion.firstElementChild.innerHTML = "expand_more";
+                accordion.firstElementChild.classList.add("fa-angle-down");
+                accordion.firstElementChild.classList.remove("fa-angle-up");
             } else {
-                accordion.firstElementChild.innerHTML = "expand_less";
+                accordion.firstElementChild.classList.add("fa-angle-up");
+                accordion.firstElementChild.classList.remove("fa-angle-down");
             }
     
             // If the checkbox is checked, enable contents inside accordion, else disable

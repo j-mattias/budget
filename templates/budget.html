@@ -5,25 +5,27 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Categories</h2>
-    <div class="container" id="category-form">
-        <form class="category-form">
+    <div class="category-container" id="category-form">
+        <h2>Categories</h2>
+        <form class="category-form border">
             {% for category in categories %}
                 {% if category in json.categories %}
-                    <input type="checkbox" name="{{ category }}" id="{{ category }}" checked disabled>
+                    <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category }}" checked disabled>
                 {% else %}
-                    <input type="checkbox" name="{{ category }}" id="{{ category }}" disabled>
+                    <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category }}" disabled>
                 {% endif %}
                 <label class="box" for="{{ category }}">{{ category }}</label>
             {% endfor %}
         </form>
     </div>
-    <h2>Budget</h2>
-    <div class="container" id="budget-form">
-        <form class="budget-form">
-            <input autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" disabled>
-            <input autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01" value="{{ json.info.total }}" disabled>
-            <input name="id" value="{{ json.info.id }}" hidden>
+    <div class="budget-container" id="budget-form">
+        <h2>Budget</h2>
+        <form class="budget-form border">
+            <div class="budget-top">
+                <input class="budget-name" autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" disabled>
+                <input class="budget-spend" autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01" value="{{ json.info.total }}" disabled>
+                <input name="id" value="{{ json.info.id }}" hidden>
+            </div>
             <!-- https://jinja.palletsprojects.com/en/3.0.x/templates/#jinja-globals.namespace -->
             {% set count = namespace(value=0) %}
             {% for category in categories %}
@@ -41,16 +43,18 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <button class="accordion active disabled" type="button" id="{{ category }}">{{ category }}<i class="material-icons md-20">expand_less</i></button>
+                    <button class="accordion active disabled" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-up"></i></button>
                     <div class="item disabled" id="{{ category }}">
                         <button type="button" class="add disabled">Add Expense</button>
                     </div>
                 {% endif %}
             {% endfor %}
-            <label class="result">Result: <span id="result">{{ json.info.result }}</span></label>
+            <div class="result-container">
+                <label class="result">Result: <span id="result">{{ json.info.result }}</span></label>
+            </div>
             <button id="edit" type="button">Edit</button>
             <button type="submit" id="/update">Save</button>
-            {{ json.info.id }}
+            <!-- {{ json.info.id }} -->
         </form>
     </div>
 {% endblock %}
