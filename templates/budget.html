@@ -52,9 +52,13 @@
             <div class="result-container">
                 <label class="result">Result: <span id="result">{{ json.info.result }}</span></label>
             </div>
-            <button id="edit" type="button">Edit</button>
-            <button type="submit" id="/update">Save</button>
-            <!-- {{ json.info.id }} -->
+            <div class="result-container">
+                <label class="remaining">Remaining: <span id="remaining">0</span></label>
+            </div>
+            <div class="form-button">
+                <button id="edit" type="button">Edit</button>
+                <button type="submit" id="/update">Save</button>
+            </div>
         </form>
     </div>
 {% endblock %}

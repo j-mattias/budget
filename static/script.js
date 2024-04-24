@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let alert = new Alert(navbar);
     alert.clear();
 
+    calculateRemaining();
     generatedInputs();
     editForm();
 
@@ -240,12 +241,37 @@ function calculateResult() {
     return total;
 }
 
+/* Calculate the money remaining if there's a spending budget provided */
+function calculateRemaining() {
+    const budgetSpend = document.querySelector(".budget-spend");
+    const remaining = document.querySelector("#remaining");
+    const result = document.querySelector("#result");
+
+    let remainingTotal = 0;
+
+    /* Only perform subtraction if there's a budget value */
+    if (budgetSpend.value && budgetSpend.value > 0) {
+        remainingTotal = parseFloat(budgetSpend.value) - parseFloat(result.innerHTML);
+    }
+
+    /* Change color if remaining is in the negative */
+    if (remainingTotal < 0) {
+        remaining.style.color = "red";
+    } else {
+        remaining.style.color = "";
+    }
+
+    remaining.innerHTML = remainingTotal.toFixed(2);
+    return remainingTotal;
+}
+
 /* Update the total result as user inputs costs */
 function updateResult(input) {
 
     // Add event listener to each cost input
     input.addEventListener("input", function() {
         calculateResult();
+        calculateRemaining();
     });
 }
 
@@ -259,7 +285,7 @@ function generatedInputs() {
         if (input.name === "expense") {
             preventNameCollision(input);
         }
-        else if (input.name === "cost") {
+        else if (input.name === "cost" || input.name == "budget") {
             updateResult(input);
         }
     });

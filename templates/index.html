@@ -9,7 +9,10 @@
     {% for budget in budgets %}
         <div class="list">
             <div class="list-item">
-                <a href="{{ url_for('budget', id=budget.id ) }}" data-date-time="{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}">{{ budget.name }}</a>
+                <a href="{{ url_for('budget', id=budget.id ) }}" data-date-time="{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}">
+                    <div class="list-name">{{ budget.name }}</div>
+                    <div class="list-date">{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}</div>
+                </a>
             </div>
             <button class="btn-delete" id="delete" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}"><i class="fa-regular fa-trash-can"></i></button>
         </div>
