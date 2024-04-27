@@ -16,8 +16,14 @@
         <h2>Budget</h2>
         <form class="budget-form border">
             <div class="budget-top">
-                <input class="budget-name" autocomplete="off" name="name" placeholder="Budget name..." type="text">
-                <input class="budget-spend" autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01">
+                <div class="input-wrapper">
+                    <label for="budget-name-input">Budget name</label>
+                    <input class="budget-name" id="budget-name-input" autocomplete="off" name="name" placeholder="Budget name..." type="text">
+                </div>
+                <div class="input-wrapper">
+                    <label for="budget-spend-input">To spend</label>
+                    <input class="budget-spend" id="budget-spend-input" autocomplete="off" name="budget" placeholder="To spend (optional)" type="number" min="0.01" step="0.01">
+                </div>
             </div>
             {% for category in categories %}
                 <button class="accordion" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-down"></i></button>

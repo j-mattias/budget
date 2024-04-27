@@ -11,6 +11,8 @@
     --button-hover: rgba(15, 85, 216, 0.8);
     --disabled: rgba(114, 114, 114, 0.2);
     --border-disabled: rgba(189, 189, 189, 0.2);
+    --alert-color: rgb(175, 0, 0);
+    --alert-border-color: rgb(255, 88, 88);
 }
 
 /* Defaults */
@@ -74,7 +76,8 @@ label,
 .fa-angle-up,
 .fa-angle-down,
 .fa-trash-can,
-.fa-xmark {
+.fa-xmark,
+.fa-arrow-up {
     background: none;
 }
 
@@ -157,11 +160,32 @@ label,
 
 /* For showing/hiding accordion inner content */
 .item {
-    display: none;
+    /* display: inline-table; */
+    display: block;
     flex-direction: column;
     flex-wrap: wrap;
     width: 100%;
     overflow: hidden;
+    max-height: 0;
+
+    /* opacity: 0; */
+    transition: max-height 0.2s ease-out;
+}
+
+/* Added to divs with .created class upon pressing delete */
+.deleted {
+    animation: remove 0.5s ease-out;
+}
+
+@keyframes remove {
+    from {
+        max-height: inherit;
+        opacity: 1;
+    }
+    to {
+        max-height: 0;
+        opacity: 0;
+    }
 }
 
 /* Add expense button styling */
@@ -180,6 +204,7 @@ input {
     padding: 8px 12px;
     font-size: 16px;
     outline-style: none;
+    font-weight: 300;
 }
 
 input:focus {
@@ -201,6 +226,20 @@ button {
 
 button:hover {
     background-color: var(--button-hover);
+}
+
+/* Scroll to top button */
+.scroll-top {
+    display: none;
+    position: fixed;
+    left: 75%;
+    bottom: 2%;
+    border-radius: 8px;
+    border: none;
+    padding: 10px 15px;
+    background-color: var(--logo-color);
+    transition: background-color 0.4s ease-out;
+    z-index: 11;
 }
 
 .form-button {
@@ -250,17 +289,17 @@ input[type="checkbox"]:disabled + .box:hover {
     cursor: not-allowed;
 }
 
-.budget-form {
+/* .budget-form {
     display: inline-block;
-}
+} */
 
 /* Alerts */
 .alert {
-    background-color: rgb(175, 0, 0);
+    background-color: var(--alert-color);
     margin-bottom: 0.5rem;
     border: thin solid;
     border-radius: 8px; 
-    border-color: rgb(255, 88, 88);
+    border-color: var(--alert-border-color);
     padding: 0.5rem;
     width: auto;
     margin: 0.5rem auto;
@@ -274,9 +313,11 @@ input[type="checkbox"]:disabled + .box:hover {
     display: none;
 }
 
-.enabled {
+/* Just used for checking state of accordion item now */
+/* .enabled {
     display: flex;
 }
+ */
 
 /* Backdrop for when dialog window opens */
 ::backdrop {
@@ -318,7 +359,7 @@ dialog {
 /* Style trashcan red when hovering over it */
 .btn-delete:hover .fa-trash-can,
 .btn-delete:hover {
-    color: red;
+    color: var(--alert-color);
     background: none;
 }
 
@@ -408,7 +449,7 @@ dialog {
 
 .budget-top {
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     width: 100%;
 }
 
@@ -418,7 +459,32 @@ dialog {
 .created input[name="cost"] {
     display: inherit;
     flex: 1;
-    width: clamp(2ch, 100px, 200px);
+    /* width: clamp(2ch, 100px, 200px); */
+    width: 100%;
+}
+
+.budget-name,
+.budget-spend {
+    padding-top: 12px;
+    margin-top: 10px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    flex: 1;
+}
+
+.input-wrapper label,
+.input-wrapper label {
+    position: absolute;
+    top: 0;
+    left: 5%;
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 0 10px;;
+    /* border: 2px solid var(--input-bg-color); */
+    background: inherit;
 }
 
 .created {

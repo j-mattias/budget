@@ -1,9 +1,10 @@
 export class Alert {
 
-    constructor(insertLoc) {
+    constructor(insertLoc, warnElem) {
 
         // Place to insert the alert element
         this.insertLoc = insertLoc;
+        this.warnElem = warnElem;
     }
 
     /* Create new alert with a message */
@@ -11,6 +12,8 @@ export class Alert {
 
         // Clear existing alert
         this.clear();
+
+        this.warn(this.warnElem);
 
         // Create alert components
         let div = document.createElement("div");
@@ -38,5 +41,14 @@ export class Alert {
         if (alert) {
             alert.remove();
         }
+    }
+
+    /* Indicate on an element by changing background color to red */
+    warn(elem) {
+        elem.style.backgroundColor = "red";
+
+        setTimeout(() => {
+            elem.style.backgroundColor = "";
+        }, 5000);
     }
 }

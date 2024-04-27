@@ -2,57 +2,15 @@ import { Alert } from "./classes.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    // Scroll to top button function
+    scrollToTop();
+
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
     const dialog = document.querySelector("dialog");
 
     // Only run if dialog element is present
     if (dialog) {
-
-        const showButtons = document.querySelectorAll("#delete");
-        const cancelButton = document.querySelector("#cancel");
-        const inputDelete = document.querySelector("#modal-input");
-        const span = document.querySelector("dialog span");
-        
-        // For each delete button, get budget name and id associated with clicked button to
-        // assign dataset contents to span and form input element, then show the modal
-        showButtons.forEach((button) => {
-            button.addEventListener("click", () => {
-
-                // If it's for deleting a budget
-                if (dialog.id === "budgets") {
-                    span.innerHTML = button.dataset.budgetName;
-                    inputDelete.value = button.dataset.budgetId;
-                } 
-                
-                // If it's for deleting an account
-                else if (dialog.id == "account") {
-                    span.innerHTML = "account";
-                }
-                dialog.showModal();
-            });
-        });
-    
-        // Close the modal if cancel button is clicked
-        cancelButton.addEventListener("click", () => {
-            dialog.close();
-        });
-    
-        // Listen for clicks outside of the active modal window, close window if clicking outside
-        dialog.addEventListener("click", (event) => {
-            console.log("event ->" ,event, "event target ->", event.target);
-    
-            // https://www.youtube.com/watch?v=ywtkJkxJsdg
-            // Get dialog dimensions, if a click happens outside of the modal, close it
-            const dialogDimensions = dialog.getBoundingClientRect();
-            
-            if (event.clientX < dialogDimensions.left ||
-                event.clientX > dialogDimensions.right ||
-                event.clientY < dialogDimensions.top ||
-                event.clientY > dialogDimensions.bottom) 
-                {
-                dialog.close();
-            }
-        });
+        dialogBox(dialog);
     }
 
     // Select the form
@@ -63,7 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const navbar = document.querySelector(".navbar");
-    let alert = new Alert(navbar);
+    const warningTarget = document.querySelector(".scroll-top");
+    let alert = new Alert(navbar, warningTarget);
     alert.clear();
 
     calculateRemaining();
@@ -139,8 +98,16 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* Enable accordion functionality on buttons */
+/* Based on https://www.w3schools.com/howto/howto_js_accordion.asp */
 function enableAccordions(buttons) {
     for (let accordion of buttons) {
+
+        // If accordion is already open (enabled) set the max-height, otherwise it will be 0
+        if (accordion.nextElementSibling.classList.contains("enabled")) {
+            // accordion.nextElementSibling.style.maxHeight = "100%";
+            accordion.nextElementSibling.style.maxHeight = accordion.nextElementSibling.scrollHeight + "px";
+        }
+
         accordion.addEventListener("click", function() {
     
             // Toggle the active class on/off
@@ -149,19 +116,24 @@ function enableAccordions(buttons) {
             // Select the item class, the sibling of accordion
             let item = this.nextElementSibling;
             let icon = this.querySelector(".accordion > .fa-solid");
-    
+
             // If category is open, close it
             if (item.classList.contains("enabled")) {
-                item.classList.add("disabled");
-                item.classList.remove("enabled");
+                item.classList.toggle("enabled");
                 icon.classList.remove("fa-angle-up");
                 icon.classList.add("fa-angle-down");
+
+                // Remove max-height to shrink element with a transition
+                item.style.maxHeight = null;
+
             // Else open it
             } else {
-                item.classList.add("enabled");
-                item.classList.remove("disabled");
+                item.classList.toggle("enabled");
                 icon.classList.remove("fa-angle-down");
                 icon.classList.add("fa-angle-up");
+
+                // Set max-height to grow element with a transition
+                item.style.maxHeight = item.scrollHeight + "px";
             }
         });
     }
@@ -170,7 +142,12 @@ function enableAccordions(buttons) {
 /* Delete inputs */
 function removeInput(id) {
     const div = document.getElementById(id);
-    div.remove();
+    div.classList.add("deleted");
+
+    // Delay delete slightly, to allow for smooth transition
+    setTimeout(() => {
+        div.remove();
+    }, 400);
 }
 
 /* Give feedback if expense names are the same */
@@ -345,6 +322,16 @@ function editForm() {
         deleteButtons.forEach((deleteButton) => {
             deleteButton.classList.toggle("disabled");
         });
+
+        // Grow item container to fit elements that were previously hidden
+        const items = document.querySelectorAll(".item");
+        items.forEach((item) => {
+
+            // Check if the accordion menu is active, only grow item container if true
+            if (item.previousElementSibling.classList.contains("active")) {
+                item.style.maxHeight = item.scrollHeight + "px";
+            }
+        });
     });
 }
 
@@ -393,7 +380,6 @@ function addInputs(buttons, created) {
             const removeButton = document.createElement("button");
             removeButton.type = "button";
             removeButton.innerHTML = '<i class="fa-regular fa-trash-can"></i>';
-            // removeButton.textContent = "-";
             removeButton.classList.add("delete");
             removeButton.addEventListener("click", () => {
                 removeInput(div.id);
@@ -409,6 +395,9 @@ function addInputs(buttons, created) {
             preventNameCollision(inputExpense);
             updateResult(inputCost);
     
+            // Increase the size of the container to fit newly created element
+            addButton.parentElement.style.maxHeight = addButton.parentElement.scrollHeight + "px";
+
             // Increment i to associate an id value for each input row with the correct delete button
             i++;
         });
@@ -497,6 +486,7 @@ function formDataCollection(budgetName, budget, result, id) {
 
         // If there's no cost in the input skip it
         if (!cost || isNaN(cost)) {
+            throw new Error("Empty cost field(s), provide cost or delete expense");
             continue;
         }
 
@@ -504,7 +494,6 @@ function formDataCollection(budgetName, budget, result, id) {
         let inputColor = input.querySelector("input[name='expense']");
 
         if (inputColor.style.backgroundColor === "red") {
-            // alert.create("Expense name collision(s), use unique names");
             formData["collisions"] = true;
             throw new Error("Expense name collision(s), use unique names");
         } else if (!categoryName) {
@@ -527,4 +516,71 @@ function formDataCollection(budgetName, budget, result, id) {
         }
     }
     return formData;
+}
+
+/* Scroll back to top of document functionality */
+function scrollToTop() {
+
+    const scrollButton = document.querySelector(".scroll-top");
+
+    window.onscroll = (() => {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            scrollButton.style.display = "block";
+        } else {
+            scrollButton.style.display = "none";
+        }
+    });
+
+    scrollButton.addEventListener("click", () => {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    });
+}
+
+/* Create a dialog when a button is clicked */
+function dialogBox(dialog) {
+    const showButtons = document.querySelectorAll("#delete");
+    const cancelButton = document.querySelector("#cancel");
+    const inputDelete = document.querySelector("#modal-input");
+    const span = document.querySelector("dialog span");
+    
+    // For each delete button, get budget name and id associated with clicked button to
+    // assign dataset contents to span and form input element, then show the modal
+    showButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+
+            // If it's for deleting a budget
+            if (dialog.id === "budgets") {
+                span.innerHTML = button.dataset.budgetName;
+                inputDelete.value = button.dataset.budgetId;
+            } 
+            
+            // If it's for deleting an account
+            else if (dialog.id == "account") {
+                span.innerHTML = "account";
+            }
+            dialog.showModal();
+        });
+    });
+
+    // Close the modal if cancel button is clicked
+    cancelButton.addEventListener("click", () => {
+        dialog.close();
+    });
+
+    // Listen for clicks outside of the active modal window, close window if clicking outside
+    dialog.addEventListener("click", (event) => {
+
+        // https://www.youtube.com/watch?v=ywtkJkxJsdg
+        // Get dialog dimensions, if a click happens outside of the modal, close it
+        const dialogDimensions = dialog.getBoundingClientRect();
+        
+        if (event.clientX < dialogDimensions.left ||
+            event.clientX > dialogDimensions.right ||
+            event.clientY < dialogDimensions.top ||
+            event.clientY > dialogDimensions.bottom) 
+            {
+            dialog.close();
+        }
+    });
 }
