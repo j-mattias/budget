@@ -289,11 +289,15 @@ input[type="checkbox"]:disabled + .box:hover {
     cursor: not-allowed;
 }
 
-/* .budget-form {
-    display: inline-block;
-} */
-
 /* Alerts */
+.alert-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 50%;
+    margin: auto;
+}
+
 .alert {
     background-color: var(--alert-color);
     margin-bottom: 0.5rem;

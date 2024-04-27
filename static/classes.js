@@ -16,20 +16,18 @@ export class Alert {
         this.warn(this.warnElem);
 
         // Create alert components
-        let div = document.createElement("div");
-        let ul = document.createElement("ul");
-        let li = document.createElement("li");
+        const div = document.createElement("div");
+        const innerDiv = document.createElement("div");
 
         // Add attributes
-        div.classList.add("container");
-        div.role = "alert";
+        div.classList.add("alert-container");
 
-        li.innerHTML = msg;
-        li.classList.add("alert");
+        innerDiv.innerHTML = msg;
+        innerDiv.classList.add("alert");
+        innerDiv.role = "alert";
 
         // Append elements to DOM
-        ul.appendChild(li);
-        div.appendChild(ul);
+        div.appendChild(innerDiv);
         this.insertLoc.after(div);
     }
 

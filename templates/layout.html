@@ -32,7 +32,7 @@
         </nav>
 
         {% if get_flashed_messages() %}
-            <div class="container">
+            <div class="alert-container">
                 <div class="alert" role="alert">
                     {{ get_flashed_messages() | join(" ") }}
                 </div>
