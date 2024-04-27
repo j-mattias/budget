@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ message }} ({{ code }})
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h2>{{ code }} {{ message }}</h2>
+        <img src="https://api.memegen.link/images/kermit/{{ top }}/{{ bottom }}.jpg?width=400" alt="{{ code }}">
+    </div>
+{% endblock %}

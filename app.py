@@ -1,11 +1,11 @@
 import os
 import re
 
-from flask import Flask, render_template, request, session, redirect, flash, url_for, jsonify
+from flask import Flask, render_template, request, session, redirect, flash, url_for, jsonify, abort
 from flask_session import Session
 from db_models import *
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import login_required, form_data_error
+from helpers import login_required, form_data_error, escape_chars
 from validator_collection import checkers
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from datetime import timedelta
@@ -57,17 +57,20 @@ def budget(id):
 
     # https://docs.sqlalchemy.org/en/20/tutorial/orm_related_objects.html#using-relationships-in-queries
     # Select budget and expenses associated with it
-    budget = db.session.execute(
-                                db.select(Budget)
-                                .join_from(Budget, Expense)
-                                .where(Budget.id == id)
-                                .group_by(Budget)
-                                .order_by(Budget.timestamp.desc())
-                                ).scalar_one()
+    try:
+        budget = db.session.execute(
+                                    db.select(Budget)
+                                    .join_from(Budget, Expense)
+                                    .where(Budget.id == id)
+                                    .group_by(Budget)
+                                    .order_by(Budget.timestamp.desc())
+                                    ).scalar_one()
+    except NoResultFound:
+        return abort(404)
     
     # Prevent other users from accessing current users budgets
     if session["user_id"] != budget.user_id:
-        return "Unauthorized"
+        return abort(401)
     
     # Initialize a dictionary to store budget and expense information
     json = {
@@ -466,5 +469,35 @@ def register():
 
     return render_template("register.html")
 
-if __name__ == "__main__":
-    app.run(debug=True)
+
+# https://flask.palletsprojects.com/en/3.0.x/errorhandling/#custom-error-pages
+# Client error responses
+@app.errorhandler(404)
+def page_not_found(e):
+
+    # Text to go on the image
+    top = escape_chars("page doesn't exist")
+    bottom = escape_chars("but that's none of my business")
+
+    return render_template("400.html", code=404, message="Not Found", top=top, bottom=bottom), 404
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+
+    # Text to go on the image
+    top = escape_chars("you don't have access")
+    bottom = escape_chars("but that's none of my business")
+
+    return render_template("400.html", code=401, message="Unauthorized", top=top, bottom=bottom), 401
+
+
+# Server error responses
+@app.errorhandler(500)
+def server_error(e):
+
+    # Text to go on the image
+    top = "500"
+    bottom = escape_chars("this is fine")
+
+    return render_template("500.html", code=500, message="Internal Server Error", top=top, bottom=bottom)

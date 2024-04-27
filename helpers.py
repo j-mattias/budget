@@ -18,6 +18,7 @@ def login_required(func):
     
     return decorated_function
 
+
 def form_data_error(form, valid_categories):
 
     error = None
@@ -50,3 +51,27 @@ def form_data_error(form, valid_categories):
                 error = "Missing cost value for one or more inputs"
 
     return error
+
+
+def escape_chars(text):
+
+    # https://memegen.link/#special-characters
+    # Escape characters that collide with reserved URL characters
+    for normal, escaped in [
+        ("?", "~q" ),
+        ("&", "~a"),
+        ("%", "~p"),
+        ("#", "~h"),
+        ("/", "~s"),
+        ("\\", "~b"),
+        ("<", "~l"),
+        (">", "~g"),
+        ('"', "''"),
+        ("-", "--"),
+        ("_", "__"),
+        (" ", "-"),
+        ("\n", "~n")
+    ]:
+        text = text.replace(normal, escaped)
+        
+    return text

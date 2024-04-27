@@ -6,17 +6,21 @@
     <form action="/delete" method="post" id="form-delete"></form>
 
     <h2>Budgets</h2>
-    {% for budget in budgets %}
-        <div class="list">
-            <div class="list-item">
-                <a href="{{ url_for('budget', id=budget.id ) }}" data-date-time="{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}">
-                    <div class="list-name">{{ budget.name }}</div>
-                    <div class="list-date">{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}</div>
-                </a>
+    {% if budgets %}
+        {% for budget in budgets %}
+            <div class="list">
+                <div class="list-item">
+                    <a href="{{ url_for('budget', id=budget.id ) }}" data-date-time="{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}">
+                        <div class="list-name">{{ budget.name }}</div>
+                        <div class="list-date">{{ budget.timestamp.strftime('%Y-%m-%d, %H:%M') }}</div>
+                    </a>
+                </div>
+                <button class="btn-delete" id="delete" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}"><i class="fa-regular fa-trash-can"></i></button>
             </div>
-            <button class="btn-delete" id="delete" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}"><i class="fa-regular fa-trash-can"></i></button>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <div>No budgets have been created</div>
+    {% endif %}
     
     <dialog id="budgets">
         <div class="dialog-container">
