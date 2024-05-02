@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey, String, TIMESTAMP
+from sqlalchemy import ForeignKey, String, TIMESTAMP, LargeBinary
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from typing import Optional, List
@@ -39,8 +39,8 @@ class Budget(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    budget: Mapped[Optional[float]]
-    result: Mapped[float]
+    budget: Mapped[Optional[bytes]] = mapped_column(LargeBinary())
+    result: Mapped[bytes] = mapped_column(LargeBinary())
     name: Mapped[str]
 
     # https://stackoverflow.com/questions/76942961/specify-timestamp-column-type-hint-in-the-creation-of-a-table-using-sqlalchemy-a
@@ -69,7 +69,7 @@ class Expense(db.Model):
     # A list in app.py will define valid categories for more flexibility
     category: Mapped[str]
     note: Mapped[Optional[str]] = mapped_column(default="expense")
-    amount: Mapped[float]
+    amount: Mapped[bytes] = mapped_column(LargeBinary())
 
     budget: Mapped["Budget"] = relationship(back_populates="expenses")
 

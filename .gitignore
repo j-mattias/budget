@@ -2,3 +2,6 @@ venv/
 ideas.txt
 __pycache__/
 delete_tables.py
+.env
+secret_variables.csv
+set_env.py

@@ -75,3 +75,25 @@ def escape_chars(text):
         text = text.replace(normal, escaped)
         
     return text
+
+
+def encrypt_data(data, key):
+
+    try:
+        encrypted_data = key.encrypt(str(data).encode())
+    except (TypeError, UnicodeError):
+        return None
+    
+    # Returns a byte string
+    return encrypted_data
+
+
+def decrypt_data(data, key):
+
+    try:
+        decrypted_data = key.decrypt(data).decode()
+    except (TypeError, UnicodeError):
+        return None
+    
+    # Returns string
+    return decrypted_data

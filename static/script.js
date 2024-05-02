@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Select the form
     const form = document.querySelector(".budget-form");
 
+    // Don't perform form operations unless there's a budget form
     if (!form) {
         return;
     }
@@ -430,6 +431,9 @@ function checkboxFilter(checkboxes) {
             if (box.checked) {
                 accordion.nextElementSibling.classList.add("enabled");
                 accordion.nextElementSibling.classList.remove("disabled");
+
+                // Set the max-height of the accordion content so that it's displayed properly
+                accordion.nextElementSibling.style.maxHeight = accordion.nextElementSibling.scrollHeight + "px";
             } else {
                 accordion.nextElementSibling.classList.remove("enabled");
                 accordion.nextElementSibling.classList.add("disabled");

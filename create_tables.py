@@ -15,6 +15,7 @@ def main():
 
     # Doesn't update tables if they're already in db
     db.create_all()
+    print("Created tables")
 
 if __name__ == "__main__":
     # create_all() requires an application context, since there's no request, create one

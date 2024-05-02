@@ -5,10 +5,16 @@ from flask import Flask, render_template, request, session, redirect, flash, url
 from flask_session import Session
 from db_models import *
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import login_required, form_data_error, escape_chars
+from helpers import login_required, form_data_error, escape_chars, encrypt_data, decrypt_data
 from validator_collection import checkers
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from datetime import timedelta
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
+
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -30,6 +36,10 @@ db.init_app(app)
 # Initialize session with app
 Session(app)
 
+# Get and set the secret key for encryption/decryption
+KEY = Fernet(os.getenv("SECRET_KEY").encode())
+
+# Valid categories for budgeting
 CATEGORIES = [
     "housing", "transportation", "utilities", "food", "clothing", "medical", "insurance",
     "personal", "debt", "savings", "retirement", "entertainment", "other"
@@ -55,6 +65,8 @@ def index():
 @login_required
 def budget(id):
 
+    error = None
+
     # https://docs.sqlalchemy.org/en/20/tutorial/orm_related_objects.html#using-relationships-in-queries
     # Select budget and expenses associated with it
     try:
@@ -72,12 +84,21 @@ def budget(id):
     if session["user_id"] != budget.user_id:
         return abort(401)
     
+    # Decrypt and convert to float in order to compare against form data
+    try:
+        budget_total = float(decrypt_data(budget.budget, KEY))
+        budget_result = float(decrypt_data(budget.result, KEY))
+    except ValueError:
+        error = "Budget could not be loaded, unable to convert values"
+        flash(error)
+        return redirect(url_for("index"))  
+
     # Initialize a dictionary to store budget and expense information
     json = {
         "info": {
             "name": budget.name,
-            "total": budget.budget,
-            "result": budget.result,
+            "total": budget_total,
+            "result": budget_result,
             "id": id
             },
         "categories": {}
@@ -87,7 +108,12 @@ def budget(id):
     for expense in budget.expenses:
         if expense.category not in json["categories"].keys():
             json["categories"][expense.category] = {}
-        json["categories"][expense.category][expense.note] = expense.amount
+        try:
+            json["categories"][expense.category][expense.note] = float(decrypt_data(expense.amount, KEY))
+        except ValueError:
+            error = "Budget could not be loaded, unable to convert values"
+            flash(error)
+            return redirect(url_for("index"))  
 
     return render_template("budget.html", json=json, categories=CATEGORIES)
 
@@ -114,8 +140,8 @@ def create():
         try:
             new_budget = Budget(
                 user_id=session["user_id"],
-                budget=budget.get("total"),
-                result=budget.get("result"),
+                budget=encrypt_data(budget.get("total"), KEY),
+                result=encrypt_data(budget.get("result"), KEY),
                 name=budget.get("name")
                 )
             db.session.add(new_budget)
@@ -139,7 +165,7 @@ def create():
                         budget_id=new_budget.id,
                         category=category,
                         note=expense,
-                        amount=amount
+                        amount=encrypt_data(amount, KEY)
                     )
                     db.session.add(new_expense)
                 except IntegrityError:
@@ -186,15 +212,22 @@ def update():
     except NoResultFound:
         error = "Budget could not be found"
 
+    # Decrypt and convert to float in order to compare against form data
+    try:
+        budget_total = float(decrypt_data(cur_budget.budget, KEY))
+        budget_result = float(decrypt_data(cur_budget.result, KEY))
+    except ValueError:
+        error = "One or more values could not be processed as float"
+
     # Update name, budget, result
     if cur_budget.name != budget.get("name"):
         cur_budget.name = budget.get("name")
 
-    if cur_budget.budget != budget.get("total"):
-        cur_budget.budget = budget.get("total")
+    if budget_total != budget.get("total"):
+        cur_budget.budget = encrypt_data(budget.get("total"), KEY)
 
-    if cur_budget.result != budget.get("result"):
-        cur_budget.result = budget.get("result")
+    if budget_result != budget.get("result"):
+        cur_budget.result = encrypt_data(budget.get("result"), KEY)
     
     # Could have updated expenses if expense id was saved in the json, but seems unnecessary
     # when there's not budget or expense history being stored
@@ -214,7 +247,7 @@ def update():
                     budget_id=cur_budget.id,
                     category=category,
                     note=expense,
-                    amount=amount
+                    amount=encrypt_data(amount, KEY)
                 )
                 db.session.add(new_expense)
             except IntegrityError:
@@ -270,9 +303,11 @@ def account():
         USER = db.session.execute(db.select(User).where(User.id == session["user_id"])).scalar_one()
     except NoResultFound:
         error = "User not found"
-
-    if error:
         flash(error)
+        abort(404)
+
+    # if error:
+    #     flash(error)
 
     return render_template("account.html", user=USER)
 
@@ -497,7 +532,7 @@ def unauthorized(e):
 def server_error(e):
 
     # Text to go on the image
-    top = "500"
+    top = " "
     bottom = escape_chars("this is fine")
 
     return render_template("500.html", code=500, message="Internal Server Error", top=top, bottom=bottom)
