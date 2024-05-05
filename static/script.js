@@ -156,11 +156,14 @@ function enableAccordions(buttons) {
 function removeInput(id) {
     const div = document.getElementById(id);
     div.classList.add("deleted");
-
+    
     // Delay delete slightly, to allow for smooth transition
     setTimeout(() => {
         div.remove();
+        calculateResult();
+        calculateRemaining();
     }, 400);
+    
 }
 
 /* Give feedback if expense names are the same */
@@ -209,9 +212,9 @@ function calculateResult() {
     // For each input add value to total
     costInputs.forEach((input) => {
 
-        // Select the input category to check if the div it's contained in is enabled or disabled
+        // Select the input category to check if the checkbox it belongs to is enabled or disabled
         const category = input.dataset.category;
-        const item = document.querySelector(`div[data-id='${category}']`);
+        const checkbox = document.querySelector(`input[name='${category}'].checkbox-filter`);
 
         value = parseFloat(input.value);
         
@@ -220,8 +223,8 @@ function calculateResult() {
             value = 0;
         }
 
-        // Only count the value if the category isn't disbled
-        if (!item.classList.contains("disabled")) {
+        // Only count the value if the category is checked
+        if (checkbox.checked) {
             total += value;
         }
     });
@@ -342,7 +345,7 @@ function editForm(edit) {
         items.forEach((item) => {
 
             // Check if the accordion menu is active, only grow item container if true
-            if (item.previousElementSibling.classList.contains("active")) {
+            if (!item.previousElementSibling.classList.contains("disabled")) {
                 item.style.maxHeight = item.scrollHeight + "px";
             }
         });
@@ -458,8 +461,9 @@ function checkboxFilter(checkboxes) {
                 accordion.nextElementSibling.style.maxHeight = 0 + "px";
             }
     
-            // Recalculate result when checkbox gets toggled
+            // Recalculate result and remaining when checkbox gets toggled
             calculateResult();
+            calculateRemaining();
         });
     });
 }
@@ -502,8 +506,11 @@ function formDataCollection(budgetName, budget, result, id) {
         let expense = input.querySelector("input[name='expense']").value.trim();
         const cost = parseFloat(input.querySelector("input[name='cost']").value.trim());
 
-        // If a category is disabled, don't include it
-        if (input.parentElement.classList.contains("disabled")) {
+        // Select checkbox associated with input category
+        const checkbox = document.querySelector(`input[name='${input.dataset.category}'].checkbox-filter`);
+
+        // If a category is unchecked, don't include it
+        if (!checkbox.checked) {
             continue;
         }
 
@@ -538,6 +545,12 @@ function formDataCollection(budgetName, budget, result, id) {
             formData["categories"][categoryName][expense] = cost;
         }
     }
+
+    // Check that some expenses were actually provided
+    if (Object.entries(formData.categories).length === 0) {
+        throw new Error("No expenses were provided");
+    }
+
     return formData;
 }
 
