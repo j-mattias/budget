@@ -22,7 +22,8 @@ app = Flask(__name__)
 # configure SQLAlchemy db URI
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_ECHO"] = True
+# Display database queries and messages in the CLI
+# app.config["SQLALCHEMY_ECHO"] = True
 
 # Configure flask-session
 app.config["SESSION_TYPE"] = "sqlalchemy"
@@ -44,6 +45,9 @@ CATEGORIES = [
     "housing", "transportation", "utilities", "food", "clothing", "medical", "insurance",
     "personal", "debt", "savings", "retirement", "entertainment", "other"
     ]
+
+# Max character length allowed for budget name and expense names
+MAX_LEN = 100
 
 
 @app.route("/")
@@ -86,7 +90,12 @@ def budget(id):
     
     # Decrypt and convert to float in order to compare against form data
     try:
-        budget_total = float(decrypt_data(budget.budget, KEY))
+        # If there's binary data to decrypt, decrypt it 
+        # (budget.budget is optional so it may not contain binary data)
+        if budget.budget:
+            budget_total = float(decrypt_data(budget.budget, KEY))
+        else:
+            budget_total = budget.budget
         budget_result = float(decrypt_data(budget.result, KEY))
     except ValueError:
         error = "Budget could not be loaded, unable to convert values"
@@ -115,7 +124,7 @@ def budget(id):
             flash(error)
             return redirect(url_for("index"))  
 
-    return render_template("budget.html", json=json, categories=CATEGORIES)
+    return render_template("budget.html", json=json, categories=CATEGORIES, max_len=MAX_LEN)
 
 
 @app.route("/create", methods=["GET", "POST"])
@@ -134,7 +143,7 @@ def create():
         expenses = form.get("categories")
 
         # Check for errors in the form
-        error = form_data_error(form, CATEGORIES)
+        error = form_data_error(form, CATEGORIES, MAX_LEN)
 
         # Try to add the budget to the database
         try:
@@ -180,10 +189,11 @@ def create():
             return jsonify({"url": url_for("index")})
         
         # If something went wrong, return the error message to display
+        db.session.rollback()
         return jsonify({"response": error})
 
     else:
-        return render_template("create.html", categories=CATEGORIES)
+        return render_template("create.html", categories=CATEGORIES, max_len=MAX_LEN)
 
 
 @app.route("/update", methods=["POST"])
@@ -200,7 +210,7 @@ def update():
     expenses = form.get("categories")
 
     # Check for errors in the form
-    error = form_data_error(form, CATEGORIES)
+    error = form_data_error(form, CATEGORIES, MAX_LEN)
 
     # Select budget by id and user_id
     try:
@@ -214,7 +224,10 @@ def update():
 
     # Decrypt and convert to float in order to compare against form data
     try:
-        budget_total = float(decrypt_data(cur_budget.budget, KEY))
+        if cur_budget.budget:
+            budget_total = float(decrypt_data(cur_budget.budget, KEY))
+        else:
+            budget_total = cur_budget.budget
         budget_result = float(decrypt_data(cur_budget.result, KEY))
     except ValueError:
         error = "One or more values could not be processed as float"

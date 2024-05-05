@@ -10,11 +10,11 @@
         <form class="category-form border">
             {% for category in categories %}
                 {% if category in json.categories %}
-                    <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category }}" checked disabled>
+                    <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category ~ '-checkbox' }}" checked disabled>
                 {% else %}
-                    <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category }}" disabled>
+                    <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category ~ '-checkbox' }}" disabled>
                 {% endif %}
-                <label class="box" for="{{ category }}">{{ category }}</label>
+                <label class="box" for="{{ category ~ '-checkbox' }}">{{ category }}</label>
             {% endfor %}
         </form>
     </div>
@@ -24,7 +24,7 @@
             <div class="budget-top">
                 <div class="input-wrapper">
                     <label for="budget-name-input">Budget name</label>
-                    <input class="budget-name" id="budget-name-input" autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" disabled>
+                    <input class="budget-name" id="budget-name-input" autocomplete="off" name="name" placeholder="Budget name..." type="text" value="{{ json.info.name }}" maxlength="{{ max_len }}" disabled>
                 </div>
                 <div class="input-wrapper">
                     <label for="budget-spend-input">To spend</label>
@@ -37,12 +37,12 @@
             {% for category in categories %}
                 {% if category in json.categories %}
                     <button class="accordion active" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-up"></i></button>
-                    <div class="item enabled" id="{{ category }}">
-                        <button type="button" class="add disabled" id="{{ category }}">Add Expense</button>
+                    <div class="item enabled" data-id="{{ category }}">
+                        <button type="button" class="add disabled">Add Expense</button>
                         {% for note, cost in json.categories[category].items() %}
                             <div id="{{ count.value }}" class="created" data-category="{{ category }}">
-                                <input id="{{ count.value }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" data-category="{{ category }}" disabled>
-                                <input id="{{ count.value }}" type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" data-category="{{ category }}" disabled>
+                                <input data-input-id="{{ count.value }}" type="text" name="expense" placeholder="Expense" value="{{ note }}" data-category="{{ category }}" maxlength="{{ max_len }}" disabled>
+                                <input data-input-id="{{ count.value }}" type="number" name="cost" placeholder="Cost" step="0.01" min="0.01" value="{{ cost }}" data-category="{{ category }}" disabled>
                                 <button class="delete disabled" type="button"><i class="fa-regular fa-trash-can"></i></button>
                             </div>
                             {% set count.value = count.value + 1 %}
@@ -50,7 +50,7 @@
                     </div>
                 {% else %}
                     <button class="accordion active disabled" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-up"></i></button>
-                    <div class="item disabled" id="{{ category }}">
+                    <div class="item disabled" data-id="{{ category }}">
                         <button type="button" class="add disabled">Add Expense</button>
                     </div>
                 {% endif %}

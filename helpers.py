@@ -19,7 +19,7 @@ def login_required(func):
     return decorated_function
 
 
-def form_data_error(form, valid_categories):
+def form_data_error(form, valid_categories, max_len):
 
     error = None
     budget = form.get("info")
@@ -32,6 +32,8 @@ def form_data_error(form, valid_categories):
         error = "Expense name collision(s), use unique names"
     elif not expenses:
         error = "Missing categories"
+    elif len(budget.get("name")) > max_len:
+        error = "Budget name exceeds character limit (100)"
 
     # Check that categories and inputs fields are valid
     for key in expenses.keys():
@@ -46,6 +48,11 @@ def form_data_error(form, valid_categories):
 
         # Check for valid cost input
         for expense in expenses[key]:
+
+            # Check character length of expense
+            if len(expense) > max_len:
+                error = "One or more expense names exceed character limit (100)"
+
             amount = expenses[key][expense]
             if not amount:
                 error = "Missing cost value for one or more inputs"
@@ -78,6 +85,10 @@ def escape_chars(text):
 
 
 def encrypt_data(data, key):
+
+    # If data is none, don't encrypt it
+    if data == None:
+        return None
 
     try:
         encrypted_data = key.encrypt(str(data).encode())

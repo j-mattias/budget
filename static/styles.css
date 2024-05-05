@@ -205,6 +205,7 @@ input {
     font-size: 16px;
     outline-style: none;
     font-weight: 300;
+    transition: background-color 0.2s ease-out;
 }
 
 input:focus {
@@ -253,6 +254,11 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+#account-form input {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Hide checkboxes */
@@ -335,12 +341,29 @@ dialog {
     border-color: var(--logo-color);
     padding: 20px;
     margin: auto;
+    width: 20%;
 }
 
 .dialog-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.dialog-container h3 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.dialog-container h3 span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dialog-container h3 span::before {
+    content: "\00a0";
 }
 
 /* Container for budget information and delete button */
@@ -625,5 +648,10 @@ dialog {
         display: flex;
         align-self: center;
         padding: 16px 20px;
+    }
+
+    /* Change dialog width to take up more space */
+    dialog {
+        width: 50%;
     }
 }

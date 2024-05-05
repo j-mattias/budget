@@ -1,9 +1,9 @@
 # Budget
 ## Description:
 Web application for creating, editing and viewing budgets. You are required to create an account to use it, you can then use the username or email you provided along with the password to log in. There are a number of categories provided for you to separate your expenses, the categories can be toggled on or off. To add expenses you simply open the accordion menu for the specified category and click the add expense button. To remove an expense click the delete button next to the input fields. The required fields in order to save a budget are:
-- Budget name
+- Budget name (100 character limit)
 - At least one active category
-- At least one expense with cost provided
+- At least one expense (100 character limit) with cost provided
 
 Money to spend doesn't need to be provided, however the amount of money remaining will not be calculated in that case. Expenses don't need to be provided, but will be given a generic name expense with an incremented number appended ex. "expense1" once the budget is saved.
 
@@ -40,7 +40,7 @@ The database used for this project is Postgresql, however since the database tab
 
 ## Files:
 ### app.py
-This is the main file of the backend for the project. It's a Flask application containing all of the routes, handling the user sessions, and the functionality for running database queries etc. At the top of the file is the app configuration, connecting to the database and configuring the session. The key for encryption/decryption is retrieved from the environment variables and stored as a "constant" (not enforced by python). The valid categories are also defined at the top part of the file, to make it easier to control which categories are allowed to be stored in the database. Error checking when creating a budget happens on the client-side as well as on the server-side to try to prevent invalid data ending up in the database. A couple of error handlers for HTTP repsonse status codes were added to give nicer user feedback compared to the default ones Flask provides.
+This is the main file of the backend for the project. It's a Flask application containing all of the routes, handling the user sessions, and the functionality for running database queries etc. At the top of the file is the app configuration, connecting to the database and configuring the session. The key for encryption/decryption is retrieved from the environment variables and stored as a "constant" (not enforced by python). The valid categories are also defined at the top part of the file, to make it easier to control which categories are allowed to be stored in the database. Max character length is also defined here, it's not set in the database as more flexibility to change it was desired. Error checking when creating a budget happens on the client-side as well as on the server-side to try to prevent invalid data ending up in the database. A couple of error handlers for HTTP repsonse status codes were added to give nicer user feedback compared to the default ones Flask provides.
 
 ```python
 @app.route("/")

@@ -21,14 +21,26 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // Create new alert instance to display upon encountering errors
     const navbar = document.querySelector(".navbar");
     const warningTarget = document.querySelector(".scroll-top");
     let alert = new Alert(navbar, warningTarget);
     alert.clear();
 
+    // Calculate the remaining funds, to spend - expense costs
     calculateRemaining();
-    generatedInputs();
-    editForm();
+
+    // Add input functionality/feedback to generated inputs (added through Jinja in templates)
+    const inputs = document.querySelectorAll(".budget-form input");
+    generatedInputs(inputs);
+
+    // Enable editing for edit form
+    const edit = document.querySelector("#edit");
+    editForm(edit);
+
+    // Add a max character length to budget name
+    const budgetNameInput = document.querySelector(".budget-form input[name='name']");
+    inputMax(budgetNameInput);
 
     /* Accordion */
     // https://www.w3schools.com/howto/howto_js_accordion.asp
@@ -176,7 +188,7 @@ function valueExists(elem, select) {
 
         if (
             nodeValue === elemValue 
-            && node.id != elem.id 
+            && node.dataset.inputId != elem.dataset.inputId 
             && nodeCategory === elemCategory 
             && nodeValue != "" 
             && elemValue != ""
@@ -199,7 +211,7 @@ function calculateResult() {
 
         // Select the input category to check if the div it's contained in is enabled or disabled
         const category = input.dataset.category;
-        const item = document.querySelector(`div[id=${category}]`);
+        const item = document.querySelector(`div[data-id='${category}']`);
 
         value = parseFloat(input.value);
         
@@ -254,19 +266,22 @@ function updateResult(input) {
 }
 
 /* Add functionality to pre-generated inputs to work the same as dynamically generated ones */
-function generatedInputs() {
-
-    const inputs = document.querySelectorAll("input");
+function generatedInputs(inputs) {
 
     // Input functionality
-    inputs.forEach((input) => {
-        if (input.name === "expense") {
-            preventNameCollision(input);
+    inputs.forEach((input) => {          
+        if (input.name === "name") {
+            inputMax(input);
         }
-        else if (input.name === "cost" || input.name == "budget") {
+        else if (input.name === "expense") {
+            preventNameCollision(input);
+            inputMax(input);
+        }
+        else if (input.name === "cost" || input.name === "budget") {
             updateResult(input);
         }
     });
+
 
     // Add remove function to pre-generated delete buttons
     const deleteButtons = document.querySelectorAll(".delete");
@@ -278,9 +293,7 @@ function generatedInputs() {
 }
 
 /* Toggling form fields on/off and showing/hiding elements for adding/removing fields */
-function editForm() {
-
-    const edit = document.querySelector("#edit");
+function editForm(edit) {
     
     if (edit === null) {
         return;
@@ -347,6 +360,9 @@ function addInputs(buttons, created) {
         i = 0;
     }
 
+    // Select allowed maxlength
+    const maxLen = document.querySelector(".budget-form input[maxlength]").maxLength;
+
     for (let addButton of buttons) {
         addButton.addEventListener("click", function() {  
             
@@ -357,20 +373,21 @@ function addInputs(buttons, created) {
             inputExpense.type = "text";
             inputExpense.name = "expense";
             inputExpense.placeholder = "Expense";
-            inputExpense.id = i;
-            inputExpense.dataset.category = addButton.parentElement.id;
-            
+            inputExpense.dataset.inputId = i;
+            inputExpense.dataset.category = addButton.parentElement.dataset.id;
+            inputExpense.maxLength = maxLen;
+
             inputCost.type = "number";
             inputCost.name = "cost";
             inputCost.placeholder = "Cost";
             inputCost.step = "0.01";
             inputCost.min = "0.01";
-            inputCost.id = i;
-            inputCost.dataset.category = addButton.parentElement.id;
+            inputCost.dataset.inputId = i;
+            inputCost.dataset.category = addButton.parentElement.dataset.id;
             
             // Create div and append inputs
             const div = document.createElement("div");            
-            div.dataset.category = addButton.parentElement.id;
+            div.dataset.category = addButton.parentElement.dataset.id;
             div.id = i;
             div.classList.add("created");
             
@@ -395,6 +412,7 @@ function addInputs(buttons, created) {
             // Add event listeners for inputs to provide more feedback
             preventNameCollision(inputExpense);
             updateResult(inputCost);
+            inputMax(inputExpense);
     
             // Increase the size of the container to fit newly created element
             addButton.parentElement.style.maxHeight = addButton.parentElement.scrollHeight + "px";
@@ -412,8 +430,8 @@ function checkboxFilter(checkboxes) {
     checkboxes.forEach((box) => {
         box.addEventListener("change", () => {
             // Select the accordion that's associated with the checkbox id
-            let accordion = document.querySelector(`button[id='${box.id}']`);
-    
+            let accordion = document.querySelector(`button[id='${box.name}']`);
+
             // Turn the accordion category on/off
             accordion.classList.toggle("disabled");
     
@@ -585,6 +603,33 @@ function dialogBox(dialog) {
             event.clientY > dialogDimensions.bottom) 
             {
             dialog.close();
+        }
+    });
+}
+
+/* Provide feedback when user hits max character limit for budget name or expense names */
+function inputMax(input) {
+
+    // Create alert to display when user enters too many characters
+    let alert = new Alert(document.querySelector(".navbar"), document.querySelector(".scroll-top"));
+    alert.clear();
+
+    input.addEventListener("input", () => {
+
+        // Check users input length vs. the allowed maxLength, provide feedback if it exceeds limit
+        if (input.value.length === input.maxLength) {
+
+            // Cut characters beyond max length
+            input.style.backgroundColor = "red";
+            setTimeout(() => {
+                input.style.backgroundColor = "";
+            }, 800);
+            
+            input.value = input.value.slice(0, input.maxLength);
+
+            alert.create(`Input character limit reached (${input.maxLength})`);
+        } else {
+            alert.clear();
         }
     });
 }

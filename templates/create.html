@@ -7,8 +7,8 @@
         <h2>Categories</h2>
         <form class="category-form border">
             {% for category in categories %}
-                <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category }}" checked>
-                <label class="box" for="{{ category }}">{{ category }}</label>
+                <input class="checkbox-filter" type="checkbox" name="{{ category }}" id="{{ category ~ '-checkbox' }}" checked>
+                <label class="box" for="{{ category ~ '-checkbox' }}">{{ category }}</label>
             {% endfor %}
         </form>
     </div>
@@ -18,7 +18,7 @@
             <div class="budget-top">
                 <div class="input-wrapper">
                     <label for="budget-name-input">Budget name</label>
-                    <input class="budget-name" id="budget-name-input" autocomplete="off" name="name" placeholder="Budget name..." type="text">
+                    <input class="budget-name" id="budget-name-input" autocomplete="off" name="name" placeholder="Budget name..." type="text" maxlength="{{ max_len }}">
                 </div>
                 <div class="input-wrapper">
                     <label for="budget-spend-input">To spend</label>
@@ -27,7 +27,7 @@
             </div>
             {% for category in categories %}
                 <button class="accordion" type="button" id="{{ category }}">{{ category }}<i class="fa-solid fa-angle-down"></i></button>
-                <div class="item" id="{{ category }}">
+                <div class="item" data-id="{{ category }}">
                     <button type="button" class="add">Add Expense</button>
                 </div>
             {% endfor %}
