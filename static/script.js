@@ -434,7 +434,7 @@ function checkboxFilter(checkboxes) {
 
             // Turn the accordion category on/off
             accordion.classList.toggle("disabled");
-    
+            
             // If the accordion doesn't have the class "active" toggle it
             if (!accordion.classList.contains("active")) {
                 accordion.classList.toggle("active");
@@ -444,17 +444,18 @@ function checkboxFilter(checkboxes) {
                 accordion.firstElementChild.classList.add("fa-angle-up");
                 accordion.firstElementChild.classList.remove("fa-angle-down");
             }
-    
+            
             // If the checkbox is checked, enable contents inside accordion, else disable
             if (box.checked) {
                 accordion.nextElementSibling.classList.add("enabled");
-                accordion.nextElementSibling.classList.remove("disabled");
 
                 // Set the max-height of the accordion content so that it's displayed properly
                 accordion.nextElementSibling.style.maxHeight = accordion.nextElementSibling.scrollHeight + "px";
             } else {
                 accordion.nextElementSibling.classList.remove("enabled");
-                accordion.nextElementSibling.classList.add("disabled");
+
+                // Hide content by setting max-height to 0
+                accordion.nextElementSibling.style.maxHeight = 0 + "px";
             }
     
             // Recalculate result when checkbox gets toggled
