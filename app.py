@@ -498,14 +498,15 @@ def register():
                     email=email.lower()
                     )
                 db.session.add(USER)
-            
+                db.session.commit()
+
             except IntegrityError:
 
                 # Revert uncommitted changes made to the session
                 db.session.rollback()
                 error = "Username and/or email is already taken"
-
-            db.session.commit()
+                flash(error)
+                return render_template("register.html")
 
             # Using render_template since redirect seems to "consume" the flash message,
             # even tho redirect seems to work in change password route
